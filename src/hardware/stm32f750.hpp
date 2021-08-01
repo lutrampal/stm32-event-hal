@@ -13,6 +13,9 @@
     #error "Undefined board"
 #endif
 
+#include <cstdint>
+
+
 /** Offset to apply to each @ref IRQn_Type to get the actual handler index
  * in the vtable */
 constexpr unsigned vtable_offset = 16;

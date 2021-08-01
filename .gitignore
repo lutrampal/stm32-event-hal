@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Build artifacts
+build/
+
+.vscode/.cortex-debug.peripherals.state.json
+.vscode/.cortex-debug.registers.state.json

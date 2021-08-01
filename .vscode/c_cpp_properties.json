@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Arm-Bare-Metal",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "${env:STM32_MCU}",
+                "${env:STM32_BOARD}"
+            ],
+            "compilerPath": "/bin/arm-none-eabi-g++",
+            "cStandard": "gnu17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-arm"
+        }
+    ],
+    "version": 4
+}

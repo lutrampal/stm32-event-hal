@@ -1,6 +1,20 @@
 # stm32-event-hal
 An event driven Hardware Abstraction Layer (HAL) for STM32 written in C++.
 
+## Table of Contents
+- [stm32-event-hal](#stm32-event-hal)
+  - [Table of Contents](#table-of-contents)
+  - [Project goals](#project-goals)
+  - [Supported hardware](#supported-hardware)
+  - [Repository structure](#repository-structure)
+  - [Development environment](#development-environment)
+    - [Required tools](#required-tools)
+    - [Preferred IDE](#preferred-ide)
+    - [Build, Flash & Debug the project](#build-flash--debug-the-project)
+      - [**With a CLI**](#with-a-cli)
+      - [**With Visual Studio Code**](#with-visual-studio-code)
+  - [Useful resources](#useful-resources)
+
 ## Project goals
 The goal of this project is to write a set of C++ classes that can be used as an HAL for the STM32 platform.  
 
@@ -45,13 +59,37 @@ stm32-event-hal
 > Platform agnostic driver classes. These classes contain logic that is independant of the system they run on. They are the "HAL" per-say. Device classes for the correct platform must be provided to them at instanciation.
 
 ## Development environment
-TODO
+### Required tools
+- make
+- [GNU Arm Embedded Toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)
+- [STM32 Cube IDE](https://www.st.com/en/development-tools/stm32cubeide.html) - Only the following executables which come packaged with the Cube IDE suite are actually required:
+  - ST-Link GDB server for debugging purposes
+  - *Specific to STM32F750-DK*: Cube Programmer for flashing the QSPI chip
 
-## Compiling the project
-TODO
+### Preferred IDE
+This is by no means an obligation but I included the workspace configuration files I use on Visual Studio Code to develop for this project. The workspace comes with a pre-configured recommanded set of extensions as well as tasks to build, flash and debug the project. 
+To properly function, the workspace expects the following environment variables to be defined:
+- `STLINK_GDB_SERVER`: Path to the ST Link GDB server
+- `CUBE_PROGRAMMER_BIN_DIR`: Path to the directory where the cube
+- `STM32_EXT_LOADER`: Path to the external loader ELF file used by Cube Programmer to flash the QSPI. A set of pre-compiled loaders for ST's development kits can be found at `$CUBE_PROGRAMMER_BIN_DIR/ExternalLoader`
+- `ARM_GDB_SERVER_PORT`: Port on which the GDB server will await connections.
+- `STM32_MCU`: Name of the MCU to compile for, as expected by `hardware/mcu.hpp`
+- `STM32_BOARD`: Name of the board to compile for, as expected by your MCU header (from the `hardware` directory)
+- `STM32_SVD_FILE`: Worskpace-relative path to the .svd file to use for debugging. SVD files can be retrieved from [this handy Github repo](https://github.com/posborne/cmsis-svd/tree/master/data/STMicro).
 
-## Debugging the project
-TODO
+### Build, Flash & Debug the project
+#### **With a CLI**
+In a separate shell, start the GDB server:
+``` Shell
+"$STLINK_GDB_SERVER" -p "$ARM_GDB_SERVER_PORT" -l 31 -v -d -s -cp "$CUBE_PROGRAMMER_BIN_DIR" -k -e -el "$STM32_EXT_LOADER"
+```
+Then run make:
+``` Shell
+make all flash-n-debug
+```
+
+#### **With Visual Studio Code**
+The included `Cortex Debug` debugging configuration will build, flash and break at `main()` provided every environment variable is properly set.
 
 ## Useful resources
 The following resources helped me develop this project:

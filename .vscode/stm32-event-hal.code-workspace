@@ -9,7 +9,86 @@
             "ms-vscode.cpptools",
             "yzhang.markdown-all-in-one",
             "mhutchie.git-graph",
-            "zixuanwang.linkerscript"
+            "marus25.cortex-debug",
+            "zixuanwang.linkerscript",
+            "xaver.clang-format"
+        ]
+    },
+    "settings": {
+        "files.associations": {
+            "memory": "cpp"
+        },
+        "editor.rulers": [
+            80
+        ],
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "xaver.clang-format",
+        "C_Cpp.errorSquiggles": "Enabled"
+    },
+    "tasks": {
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "Build",
+                "type": "shell",
+                "command": "make",
+                "args": [
+                    "all"
+                ],
+                "problemMatcher": [
+                    "$gcc"
+                ],
+                "group": {
+                    "kind": "build",
+                    "isDefault": true
+                }
+            },
+            {
+                "label": "Clean",
+                "type": "shell",
+                "command": "make",
+                "args": [
+                    "clean"
+                ],
+                "problemMatcher": [
+                    "$gcc"
+                ]
+            },
+            {
+                "label": "Clean & Build",
+                "dependsOrder": "sequence",
+                "dependsOn": [ "Clean", "Build"],
+                "problemMatcher": [
+                    "$gcc"
+                ]
+            }
+        ]
+    },
+    "launch": {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "Cortex Debug",
+                "cwd": "${workspaceRoot}",
+                "executable": "./build/example.elf",
+                "request": "launch",
+                "type": "cortex-debug",
+                "servertype": "stlink",
+                "stm32cubeprogrammer": "${env:CUBE_PROGRAMMER_BIN_DIR}",
+                "serverpath": "${env:STLINK_GDB_SERVER}",
+                "serverArgs": [
+                    "-l", "31", "-v", "-s", "-k", "-e", "-el", "${env:STM32_EXT_LOADER}"
+                ],
+                "overrideGDBServerStartedRegex": "Waiting for connection on port.*",
+                "gdbPath": "${env:GDB}",
+                "svdFile": "${env:STM32_SVD_FILE}",
+                "overrideLaunchCommands": [
+                    "load"
+                ],
+                "runToMain": true,
+                "preLaunchTask": "Build",
+                "demangle": true,
+            }
         ]
     }
 }
