@@ -35,4 +35,6 @@ constexpr unsigned plln =
     / static_cast<uint64_t>(hse_in_clk_hz);
 constexpr unsigned pllq = 9;
 
+constexpr std::size_t nb_timers = 14;
+
 #endif

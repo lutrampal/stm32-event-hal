@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 #include <cstddef>
-#include <device/irqs.hpp>
+#include <device/stm32f750/stm32f750_irqs.hpp>
 #include <hardware/mcu.hpp>
 
 using namespace hal::device;
@@ -20,6 +20,12 @@ using namespace hal::device;
 extern uint32_t _sidata, _sdata, _edata, _sbss, _ebss, _sidtcm, _sdtcm, _edtcm,
     _siitcm, _sitcm, _eitcm, _estack;
 
+/* Array of init functions (constructors) to call before branching to main to
+ * initialize static data. */
+extern void (*_spreinit_array[])(void) __attribute__((weak));
+extern void (*_epreinit_array[])(void) __attribute__((weak));
+extern void (*_sinit_array[])(void) __attribute__((weak));
+extern void (*_einit_array[])(void) __attribute__((weak));
 
 extern "C" {
 void __attribute__((naked)) __attribute__((section(".reset")))
@@ -483,6 +489,9 @@ static void m_initVtable(void)
     g_vtable[1] = handleReset;
     /* All interrupts default to error handler */
     for (unsigned i = 2; i < nb_irqs; ++i) { g_vtable[i] = handleError; }
+
+    g_vtable[TIM2_IRQn + vtable_offset] = handleTIM2Event;
+    g_vtable[TIM5_IRQn + vtable_offset] = handleTIM5Event;
 }
 
 static void m_setCoreSpeed(void)
@@ -569,6 +578,15 @@ static void m_initQSPI()
     m_qspiMakeMemoryMapped();
 }
 
+static void m_initStaticObjects()
+{
+    size_t pre_init_sz = _epreinit_array - _spreinit_array;
+    for (size_t i = 0; i < pre_init_sz; ++i) { _spreinit_array[i](); }
+
+    size_t init_sz = _einit_array - _sinit_array;
+    for (size_t i = 0; i < init_sz; ++i) { _sinit_array[i](); }
+}
+
 
 /*******************************************************************************
  * EXTERN FUNCTION IMPLEMENTATIONS
@@ -581,6 +599,18 @@ void handleReset(void)
     /* Do not break debugger when in standy or sleep mode */
 #ifdef DEBUG
     DBGMCU->CR |= DBGMCU_CR_DBG_STANDBY | DBGMCU_CR_DBG_SLEEP;
+
+    /* Suspend all timers when the core is halted by debug */
+    DBGMCU->APB1FZ |=
+        DBGMCU_APB1_FZ_DBG_TIM2_STOP | DBGMCU_APB1_FZ_DBG_TIM3_STOP
+        | DBGMCU_APB1_FZ_DBG_TIM4_STOP | DBGMCU_APB1_FZ_DBG_TIM5_STOP
+        | DBGMCU_APB1_FZ_DBG_TIM6_STOP | DBGMCU_APB1_FZ_DBG_TIM7_STOP
+        | DBGMCU_APB1_FZ_DBG_TIM12_STOP | DBGMCU_APB1_FZ_DBG_TIM13_STOP
+        | DBGMCU_APB1_FZ_DBG_TIM14_STOP;
+    DBGMCU->APB2FZ |=
+        DBGMCU_APB2_FZ_DBG_TIM1_STOP | DBGMCU_APB2_FZ_DBG_TIM8_STOP
+        | DBGMCU_APB2_FZ_DBG_TIM9_STOP | DBGMCU_APB2_FZ_DBG_TIM10_STOP
+        | DBGMCU_APB2_FZ_DBG_TIM11_STOP;
 #endif
     m_initData();
     m_initVtable();
@@ -589,6 +619,7 @@ void handleReset(void)
     m_initQSPI();
     m_initFMC();
     m_cleanupTimer();
+    m_initStaticObjects();
 
     __asm__("B main");
 }

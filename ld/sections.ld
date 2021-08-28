@@ -46,6 +46,30 @@ SECTIONS
         __exidx_end = .;
     } >QSPI
 
+    /* The following 2 sections contain constructors of static objects and will 
+     * be run before branching to main. 
+     * We don't need them to be particularly fast and we can run them after 
+     * initializing QSPI so we'll store them over there. */
+    .preinit_array :
+    {
+      . = ALIGN(4);
+      _spreinit_array = .;
+      KEEP (*(.preinit_array))
+      KEEP (*(.preinit_array*))
+      _epreinit_array = .;
+      . = ALIGN(4);
+    } >QSPI
+    
+    .init_array :
+    {
+      . = ALIGN(4);
+      _sinit_array = .;
+      KEEP (*(.init_array))
+      KEEP (*(.init_array*))
+      _einit_array = .;
+      . = ALIGN(4);
+    } >QSPI
+
     .rodata :
     {
         . = ALIGN(4);

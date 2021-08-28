@@ -7,7 +7,8 @@
             ],
             "defines": [
                 "${env:STM32_MCU}",
-                "${env:STM32_BOARD}"
+                "${env:STM32_BOARD}",
+                "DEBUG"
             ],
             "compilerPath": "/bin/arm-none-eabi-g++",
             "cStandard": "gnu17",
