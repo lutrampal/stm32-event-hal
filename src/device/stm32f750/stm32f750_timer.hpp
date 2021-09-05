@@ -1,6 +1,6 @@
 
 /*******************************************************************************
- * Interface file for timer device of STM32F750
+ * Interface file for timers of STM32F750
  ******************************************************************************/
 
 #ifndef _HAL_DEVICE_STM32F750_TIMER_DEVICE_HPP
@@ -25,17 +25,17 @@ namespace device
  * CLASS DEFINITION
  ******************************************************************************/
 
-class Stm32f750TimerDevice : public TimerDevice
+class Stm32f750Timer : public TimerDevice
 {
   public:
-    Stm32f750TimerDevice(TIM_TypeDef* hw_timer,
-                         IRQn_Type irq_nb,
-                         volatile uint32_t* clk_en_reg,
-                         long clk_en_msk,
-                         volatile uint32_t* rst_reg,
-                         long rst_msk,
-                         size_t counter_sz);
-    ~Stm32f750TimerDevice();
+    Stm32f750Timer(TIM_TypeDef* hw_timer,
+                   IRQn_Type irq_nb,
+                   volatile uint32_t* clk_en_reg,
+                   long clk_en_msk,
+                   volatile uint32_t* rst_reg,
+                   long rst_msk,
+                   size_t counter_sz);
+    ~Stm32f750Timer();
 
     WaitTimeUnitDuration getRemainingWaitTime() override;
     bool startWait(WaitTimeUnitDuration::rep count) override;

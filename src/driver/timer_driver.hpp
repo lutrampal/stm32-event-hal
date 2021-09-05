@@ -52,7 +52,7 @@ class TimerDriver
     template<typename TRep, typename TPeriod>
     Timer asyncWait(
         const std::chrono::duration<TRep, TPeriod>& timeout,
-        const std::function<void(device::ErrorStatus&)>& event_callback);
+        const std::function<void(device::ErrorStatus&)>&& event_callback);
 
   private:
     struct WaitOp {

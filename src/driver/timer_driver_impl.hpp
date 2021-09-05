@@ -18,7 +18,7 @@
 template<typename TRep, typename TPeriod>
 hal::driver::TimerDriver::Timer hal::driver::TimerDriver::asyncWait(
     const std::chrono::duration<TRep, TPeriod>& wait_time,
-    const std::function<void(hal::device::ErrorStatus&)>& event_callback)
+    const std::function<void(hal::device::ErrorStatus&)>&& event_callback)
 {
     using namespace std;
     using namespace hal::device;

@@ -1,13 +1,13 @@
 
 /*******************************************************************************
- * Implementation file of TimerDevice class for STM32F750 MCU
+ * Implementation file for timers of STM32F750
  ******************************************************************************/
 
 /*******************************************************************************
  * INCLUDE DIRECTIVES
  ******************************************************************************/
 
-#include "stm32f750_timer_device.hpp"
+#include "stm32f750_timer.hpp"
 
 #include <device/exceptions/timer_exceptions.hpp>
 #include <hardware/mcu.hpp>
@@ -20,13 +20,13 @@ using namespace hal::device;
  * CONSTRUCTORS & DESTRUCTOR
  ******************************************************************************/
 
-Stm32f750TimerDevice::Stm32f750TimerDevice(TIM_TypeDef* hw_timer,
-                                           IRQn_Type irq_nb,
-                                           volatile uint32_t* clk_en_reg,
-                                           long clk_en_msk,
-                                           volatile uint32_t* rst_reg,
-                                           long rst_msk,
-                                           size_t counter_sz)
+Stm32f750Timer::Stm32f750Timer(TIM_TypeDef* hw_timer,
+                               IRQn_Type irq_nb,
+                               volatile uint32_t* clk_en_reg,
+                               long clk_en_msk,
+                               volatile uint32_t* rst_reg,
+                               long rst_msk,
+                               size_t counter_sz)
 : hw_timer{hw_timer}, irq_nb{irq_nb}, clk_en_reg{clk_en_reg},
   clk_en_msk{clk_en_msk}, rst_reg{rst_reg}, rst_msk{rst_msk},
   max_count{(2UL << counter_sz) - 1UL}
@@ -46,7 +46,7 @@ Stm32f750TimerDevice::Stm32f750TimerDevice(TIM_TypeDef* hw_timer,
     hw_timer->DIER |= TIM_DIER_UIE;
 }
 
-Stm32f750TimerDevice::~Stm32f750TimerDevice()
+Stm32f750Timer::~Stm32f750Timer()
 {
     hw_timer->DIER &= ~TIM_DIER_UIE;
     hw_timer->CR1 &= ~TIM_CR1_CEN;
@@ -70,12 +70,12 @@ Stm32f750TimerDevice::~Stm32f750TimerDevice()
  * PUBLIC METHOD IMPLEMENTATIONS
  ******************************************************************************/
 
-TimerDevice::WaitTimeUnitDuration Stm32f750TimerDevice::getRemainingWaitTime()
+TimerDevice::WaitTimeUnitDuration Stm32f750Timer::getRemainingWaitTime()
 {
     return TimerDevice::WaitTimeUnitDuration{programmed_count - hw_timer->CNT};
 }
 
-void Stm32f750TimerDevice::usleep(WaitTimeUnitDuration::rep count)
+void Stm32f750Timer::usleep(WaitTimeUnitDuration::rep count)
 {
     if (count > max_count) {
         throw InvalidTimerCountException{count, max_count};
@@ -98,7 +98,7 @@ void Stm32f750TimerDevice::usleep(WaitTimeUnitDuration::rep count)
     hw_timer->SR &= ~TIM_SR_UIF;
 }
 
-bool Stm32f750TimerDevice::startWait(WaitTimeUnitDuration::rep count)
+bool Stm32f750Timer::startWait(WaitTimeUnitDuration::rep count)
 {
     if (count > max_count) {
         throw InvalidTimerCountException{count, max_count};
@@ -120,7 +120,7 @@ bool Stm32f750TimerDevice::startWait(WaitTimeUnitDuration::rep count)
     return true;
 }
 
-bool Stm32f750TimerDevice::suspendWait()
+bool Stm32f750Timer::suspendWait()
 {
     hw_timer->CR1 &= ~TIM_CR1_CEN;
     NVIC_DisableIRQ(irq_nb);
@@ -128,7 +128,7 @@ bool Stm32f750TimerDevice::suspendWait()
     return true;
 }
 
-bool Stm32f750TimerDevice::cancelWait()
+bool Stm32f750Timer::cancelWait()
 {
     /* Nothing to do in particular aside from suspending, settings will be
      * erased by next startWait() call */
@@ -138,7 +138,7 @@ bool Stm32f750TimerDevice::cancelWait()
     return true;
 }
 
-bool Stm32f750TimerDevice::resumeWait()
+bool Stm32f750Timer::resumeWait()
 {
     NVIC_EnableIRQ(irq_nb);
     hw_timer->CR1 |= TIM_CR1_CEN;
@@ -146,7 +146,7 @@ bool Stm32f750TimerDevice::resumeWait()
     return true;
 }
 
-bool Stm32f750TimerDevice::completeWait()
+bool Stm32f750Timer::completeWait()
 {
     /* No need to disable the timer as we've set TIM_CR1_OPM */
     callback(ErrorStatus{ErrorCode::Success});
