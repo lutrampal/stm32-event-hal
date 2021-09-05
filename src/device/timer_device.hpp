@@ -33,7 +33,8 @@ class TimerDevice
      * @param callback
      *  The new callback function. It will receive as paramater an error status
      * indicating if the wait operation was succesfully executed or not. */
-    void setWaitCompleteCallback(std::function<void(ErrorStatus&&)> callback);
+    void setWaitCompleteCallback(
+        const std::function<void(ErrorStatus&&)>& callback);
 
     virtual WaitTimeUnitDuration getRemainingWaitTime()     = 0;
     virtual bool suspendWait()                              = 0;

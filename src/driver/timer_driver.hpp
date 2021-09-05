@@ -50,8 +50,9 @@ class TimerDriver
      * finished. This callback will receive an error status as parameter,
      * indicating if the wait operation succeeded or not. */
     template<typename TRep, typename TPeriod>
-    Timer asyncWait(const std::chrono::duration<TRep, TPeriod>& timeout,
-                    std::function<void(device::ErrorStatus&)> event_callback);
+    Timer asyncWait(
+        const std::chrono::duration<TRep, TPeriod>& timeout,
+        const std::function<void(device::ErrorStatus&)>& event_callback);
 
   private:
     struct WaitOp {

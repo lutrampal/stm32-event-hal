@@ -36,7 +36,7 @@ using namespace hal::device;
  ******************************************************************************/
 
 void TimerDevice::setWaitCompleteCallback(
-    std::function<void(ErrorStatus&&)> callback)
+    const std::function<void(ErrorStatus&&)>& callback)
 {
     this->callback = callback;
 }
