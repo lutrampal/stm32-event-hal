@@ -43,7 +43,9 @@ TimerDriver::TimerDriver(EventLoop& event_loop, device::TimerDevice& device)
 
 void TimerDriver::completeWait(device::ErrorStatus&& status)
 {
-    event_loop.pushEvent(bind(wait_queue.front().callback, status));
+    if (wait_queue.front().callback) {
+        event_loop.pushEvent(bind(wait_queue.front().callback, status));
+    }
     wait_queue.pop_front();
 
     if (!wait_queue.empty()) {
@@ -78,8 +80,10 @@ void TimerDriver::cancelWait(Handle handle)
         }
         /* The operation was cancelled and the completion handler won't be
          * called, signal the aborted event to the loop */
-        event_loop.pushEvent(
-            bind(wait_queue.front().callback, ErrorStatus{ErrorCode::Aborted}));
+        if (wait_queue.front().callback) {
+            event_loop.pushEvent(bind(wait_queue.front().callback,
+                                      ErrorStatus{ErrorCode::Aborted}));
+        }
         wait_queue.pop_front();
 
         if (!wait_queue.empty()) {
@@ -102,9 +106,11 @@ void TimerDriver::cancelWait(Handle handle)
             TimerDevice::WaitTimeUnitDuration canceled_wait_time =
                 it->wait_time;
             /* The operation was cancelled and the completion handler won't be
-             * called, signal the abortion event to the loop */
-            event_loop.pushEvent(
-                bind(it->callback, ErrorStatus{ErrorCode::Aborted}));
+             * called, signal the aborted event to the loop */
+            if (it->callback) {
+                event_loop.pushEvent(
+                    bind(it->callback, ErrorStatus{ErrorCode::Aborted}));
+            }
             it = wait_queue.erase(it);
             if (it != wait_queue.end()) {
                 it->wait_time += canceled_wait_time;

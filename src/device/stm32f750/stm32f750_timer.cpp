@@ -23,9 +23,9 @@ using namespace hal::device;
 Stm32f750Timer::Stm32f750Timer(TIM_TypeDef* hw_timer,
                                IRQn_Type irq_nb,
                                volatile uint32_t* clk_en_reg,
-                               long clk_en_msk,
+                               uint32_t clk_en_msk,
                                volatile uint32_t* rst_reg,
-                               long rst_msk,
+                               uint32_t rst_msk,
                                size_t counter_sz)
 : hw_timer{hw_timer}, irq_nb{irq_nb}, clk_en_reg{clk_en_reg},
   clk_en_msk{clk_en_msk}, rst_reg{rst_reg}, rst_msk{rst_msk},
@@ -48,6 +48,7 @@ Stm32f750Timer::Stm32f750Timer(TIM_TypeDef* hw_timer,
 
 Stm32f750Timer::~Stm32f750Timer()
 {
+    NVIC_DisableIRQ(irq_nb);
     hw_timer->DIER &= ~TIM_DIER_UIE;
     hw_timer->CR1 &= ~TIM_CR1_CEN;
     *clk_en_reg &= ~clk_en_msk;
@@ -146,10 +147,13 @@ bool Stm32f750Timer::resumeWait()
     return true;
 }
 
-bool Stm32f750Timer::completeWait()
+bool Stm32f750Timer::onUpdateInterrupt()
 {
-    /* No need to disable the timer as we've set TIM_CR1_OPM */
-    callback(ErrorStatus{ErrorCode::Success});
+    /* No need to disable the timer as we've set TIM_CR1_OPM, IRQ is cleared by
+     * IRQ handler */
+    if (wait_complete_callback) {
+        wait_complete_callback(ErrorStatus{ErrorCode::Success});
+    }
 
     return true;
 }

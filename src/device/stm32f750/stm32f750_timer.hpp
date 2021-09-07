@@ -31,18 +31,21 @@ class Stm32f750Timer : public TimerDevice
     Stm32f750Timer(TIM_TypeDef* hw_timer,
                    IRQn_Type irq_nb,
                    volatile uint32_t* clk_en_reg,
-                   long clk_en_msk,
+                   uint32_t clk_en_msk,
                    volatile uint32_t* rst_reg,
-                   long rst_msk,
+                   uint32_t rst_msk,
                    size_t counter_sz);
     ~Stm32f750Timer();
+
+    /** Method to be called by the IRQ handler when the update interrupt is
+     * generated (i.e. the timer goes off) */
+    bool onUpdateInterrupt();
 
     WaitTimeUnitDuration getRemainingWaitTime() override;
     bool startWait(WaitTimeUnitDuration::rep count) override;
     bool suspendWait() override;
     bool cancelWait() override;
     bool resumeWait() override;
-    bool completeWait() override;
     void usleep(WaitTimeUnitDuration::rep count) override;
 
   private:
@@ -53,10 +56,10 @@ class Stm32f750Timer : public TimerDevice
     const IRQn_Type irq_nb;
 
     volatile uint32_t* const clk_en_reg;
-    const long clk_en_msk;
+    const uint32_t clk_en_msk;
 
     volatile uint32_t* const rst_reg;
-    const long rst_msk;
+    const uint32_t rst_msk;
 
     const WaitTimeUnitDuration::rep max_count;
 };
