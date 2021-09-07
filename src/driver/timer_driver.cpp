@@ -58,14 +58,14 @@ void TimerDriver::cancelWait(Handle handle)
     /* Disable Timer IRQ: We don't want the timer callback accessing internal
      * class data while we're removing this wait op */
     if (!device.suspendWait()) {
-        throw CancelAsyncOpFailure{};
+        throw CancelAsyncOpFailure{"Couldn't suspend wait on device"};
     }
 
     if (wait_queue.empty()) {
         /* Nothing to cancel, maybe the timer already went off and it was the
          * only one? */
         device.resumeWait();
-        throw CancelAsyncOpFailure{};
+        throw CancelAsyncOpFailure{"Nothing to cancel"};
     }
 
     if (wait_queue.front().handle == handle) {
@@ -76,7 +76,7 @@ void TimerDriver::cancelWait(Handle handle)
         if (!device.cancelWait()) {
             /* Too late */
             device.resumeWait();
-            throw CancelAsyncOpFailure{};
+            throw CancelAsyncOpFailure{"Couldn't cancel wait operation"};
         }
         /* The operation was cancelled and the completion handler won't be
          * called, signal the aborted event to the loop */
@@ -101,7 +101,7 @@ void TimerDriver::cancelWait(Handle handle)
             /* The handle does not exist, the wait operation was already
              * executed */
             device.resumeWait();
-            throw CancelAsyncOpFailure{};
+            throw CancelAsyncOpFailure{"Wait operation was already exec'd"};
         } else {
             TimerDevice::WaitTimeUnitDuration canceled_wait_time =
                 it->wait_time;

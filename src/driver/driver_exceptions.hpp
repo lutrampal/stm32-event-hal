@@ -11,6 +11,7 @@
  ******************************************************************************/
 
 #include <exception>
+#include <string>
 
 namespace hal
 {
@@ -20,19 +21,37 @@ namespace device
  * CLASS DEFINITIONS
  ******************************************************************************/
 
-class StartAsyncOpFailure : std::exception
-{
+struct StartAsyncOpFailure : std::exception {
+    const std::string reason;
+    StartAsyncOpFailure(std::string&& reason = ""): reason{reason}
+    {
+    }
+
     const char* what() const noexcept override
     {
-        return "Failed to start asynchronous operation";
+        if (reason.empty()) {
+            return "Failed to start asynchronous operation";
+        } else {
+            return ("Failed to start asynchronous operation: " + reason)
+                .c_str();
+        }
     }
 };
 
-class CancelAsyncOpFailure : std::exception
-{
+struct CancelAsyncOpFailure : std::exception {
+    const std::string reason;
+    CancelAsyncOpFailure(std::string&& reason = ""): reason{reason}
+    {
+    }
+
     const char* what() const noexcept override
     {
-        return "Failed to cancel asynchronous operation";
+        if (reason.empty()) {
+            return "Failed to cancel asynchronous operation";
+        } else {
+            return ("Failed to cancel asynchronous operation: " + reason)
+                .c_str();
+        }
     }
 };
 

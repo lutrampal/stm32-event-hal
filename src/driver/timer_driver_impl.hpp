@@ -29,7 +29,7 @@ hal::driver::TimerDriver::Timer hal::driver::TimerDriver::asyncWait(
     /* Disable Timer IRQ: We don't want the timer callback accessing internal
      * class data while we're adding this wait op */
     if (!device.suspendWait()) {
-        throw StartAsyncOpFailure{};
+        throw StartAsyncOpFailure{"Couldn't suspend running wait on device"};
     }
 
     TimerDevice::WaitTimeUnitDuration dev_wait_duration =
@@ -53,7 +53,7 @@ hal::driver::TimerDriver::Timer hal::driver::TimerDriver::asyncWait(
         if (!device.cancelWait()) {
             /* We cannot go further */
             device.resumeWait();
-            throw StartAsyncOpFailure{};
+            throw StartAsyncOpFailure{"Couldn't reschedule wait on device"};
         }
 
         device.startWait(dev_wait_duration.count());
