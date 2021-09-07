@@ -13,6 +13,7 @@
 #include <device/timer_device.hpp>
 #include <exception>
 #include <hardware/mcu.hpp>
+#include <string>
 
 namespace hal
 {
@@ -46,7 +47,9 @@ struct InvalidTimerCountException : TimerException {
 
     const char* what() const noexcept override
     {
-        return "Invalid timer count";
+        return ("Invalid timer count: " + std::to_string(count)
+                + " while max count is " + std::to_string(max_count))
+            .c_str();
     }
 };
 

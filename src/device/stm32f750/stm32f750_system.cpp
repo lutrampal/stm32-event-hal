@@ -8,8 +8,10 @@
  ******************************************************************************/
 
 #include "stm32f750_timer.hpp"
+#include "stm32f750_uart.hpp"
 
 #include <device/exceptions/system_exceptions.hpp>
+#include <device/gpio_function.hpp>
 #include <device/system.hpp>
 #include <hardware/mcu.hpp>
 
@@ -157,4 +159,85 @@ TimerDevice& System::getTimer(unsigned id)
     }
 
     return *timers[id - 1];
+}
+
+CharacterDevice<char>& System::getUart(unsigned id)
+{
+    if (id < 1 || id > nb_uarts) {
+        throw InvalidUartIdException(id);
+    }
+
+    /* IDs start at 1
+     * UART objects are not constructed at startup but only when they are
+     * requested.
+     * We must also setup the GPIOs */
+    if (uarts[id - 1] == nullptr) {
+        switch (id) {
+            case 1:
+                RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN; /* VCP_RX */
+                RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN; /* VCP_TX */
+                gpioFunctionConfigure(GPIOA, 9, SelFunc::Alt7,
+                                      PinSpeed::Medium);
+                gpioFunctionConfigure(GPIOB, 7, SelFunc::Alt7,
+                                      PinSpeed::Medium);
+                uarts[0] = make_unique<Stm32f750Uart>(
+                    USART1, USART1_IRQn, &RCC->APB2ENR, RCC_APB2ENR_USART1EN,
+                    uart_baudrate);
+                break;
+            case 2:
+                /* TODO: GPIO setup */
+                throw UnimplementedDeviceException("USART2");
+                uarts[1] = make_unique<Stm32f750Uart>(
+                    USART2, USART2_IRQn, &RCC->APB1ENR, RCC_APB1ENR_USART2EN,
+                    uart_baudrate);
+                break;
+            case 3:
+                /* TODO: GPIO setup */
+                throw UnimplementedDeviceException("USART3");
+                uarts[2] = make_unique<Stm32f750Uart>(
+                    USART3, USART3_IRQn, &RCC->APB1ENR, RCC_APB1ENR_USART3EN,
+                    uart_baudrate);
+                break;
+            case 4:
+                /* TODO: GPIO setup */
+                throw UnimplementedDeviceException("UART4");
+                uarts[3] = make_unique<Stm32f750Uart>(
+                    UART4, UART4_IRQn, &RCC->APB1ENR, RCC_APB1ENR_UART4EN,
+                    uart_baudrate);
+                break;
+            case 5:
+                /* TODO: GPIO setup */
+                throw UnimplementedDeviceException("UART5");
+                uarts[4] = make_unique<Stm32f750Uart>(
+                    UART5, UART5_IRQn, &RCC->APB1ENR, RCC_APB1ENR_UART5EN,
+                    uart_baudrate);
+                break;
+            case 6:
+                /* TODO: GPIO setup */
+                throw UnimplementedDeviceException("USART6");
+                uarts[5] = make_unique<Stm32f750Uart>(
+                    USART6, USART6_IRQn, &RCC->APB2ENR, RCC_APB2ENR_USART6EN,
+                    uart_baudrate);
+                break;
+            case 7:
+                /* TODO: GPIO setup */
+                throw UnimplementedDeviceException("UART7");
+                uarts[6] = make_unique<Stm32f750Uart>(
+                    UART7, UART7_IRQn, &RCC->APB1ENR, RCC_APB1ENR_UART7EN,
+                    uart_baudrate);
+                break;
+            case 8:
+                /* TODO: GPIO setup */
+                throw UnimplementedDeviceException("UART8");
+                uarts[7] = make_unique<Stm32f750Uart>(
+                    UART8, UART8_IRQn, &RCC->APB1ENR, RCC_APB1ENR_UART8EN,
+                    uart_baudrate);
+                break;
+
+            default:
+                throw InvalidUartIdException(id);
+        }
+    }
+
+    return *uarts[id - 1];
 }

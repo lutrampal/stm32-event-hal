@@ -24,6 +24,8 @@ constexpr unsigned nb_irqs = 113;
 
 /** CPU speed */
 constexpr unsigned core_clk_hz = 216000000;
+/** APB2 clock is setup in boot sequence and is derived from the core clock. */
+constexpr unsigned apb2_clk_hz = core_clk_hz / 2;
 
 /* The output clock of the PLL is given by:
  * VCO_out_clk = (VCO_in_clk / PLLM)*PLLN
@@ -36,5 +38,8 @@ constexpr unsigned plln =
 constexpr unsigned pllq = 9;
 
 constexpr std::size_t nb_timers = 14;
+constexpr std::size_t nb_uarts  = 8;
+
+constexpr uint32_t uart_baudrate = 115200;
 
 #endif

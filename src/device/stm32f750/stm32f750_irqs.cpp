@@ -9,6 +9,9 @@
 
 #include "stm32f750_irqs.hpp"
 
+#include "stm32f750_timer.hpp"
+#include "stm32f750_uart.hpp"
+
 #include <device/system.hpp>
 #include <exception>
 #include <hardware/mcu.hpp>
@@ -35,7 +38,8 @@ static inline void handle_timer_event(TIM_TypeDef* timer, unsigned id)
         /* clear interrupt */
         timer->SR &= ~TIM_SR_UIF;
         try {
-            System::getInstance().getTimer(id).completeWait();
+            static_cast<Stm32f750Timer&>(System::getInstance().getTimer(id))
+                .onUpdateInterrupt();
         } catch (const std::exception& e) {
             // TODO: Is there anything better we can do here?
             handleError();
@@ -61,5 +65,15 @@ void handleTIM2Event(void)
 void handleTIM5Event(void)
 {
     handle_timer_event(TIM5, 5);
+}
+
+void handleUSART1Event(void)
+{
+    if (USART1->ISR & USART_ISR_TXE) {
+        /* Transmit data registry empty, this bit will be cleared when writing
+         * the next char to TDR register in the following call. */
+        static_cast<Stm32f750Uart&>(System::getInstance().getUart(1))
+            .onTransmitDataRegisterEmpty();
+    }
 }
 }

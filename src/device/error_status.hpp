@@ -24,7 +24,7 @@ namespace device
 class ErrorStatus
 {
   public:
-    ErrorStatus(ErrorCode code = ErrorCode::Success);
+    ErrorStatus(ErrorCode code);
 
     ErrorCode get_code() const;
 

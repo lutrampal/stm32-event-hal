@@ -490,8 +490,9 @@ static void m_initVtable(void)
     /* All interrupts default to error handler */
     for (unsigned i = 2; i < nb_irqs; ++i) { g_vtable[i] = handleError; }
 
-    g_vtable[TIM2_IRQn + vtable_offset] = handleTIM2Event;
-    g_vtable[TIM5_IRQn + vtable_offset] = handleTIM5Event;
+    g_vtable[TIM2_IRQn + vtable_offset]   = handleTIM2Event;
+    g_vtable[TIM5_IRQn + vtable_offset]   = handleTIM5Event;
+    g_vtable[USART1_IRQn + vtable_offset] = handleUSART1Event;
 }
 
 static void m_setCoreSpeed(void)
@@ -587,6 +588,14 @@ static void m_initStaticObjects()
     for (size_t i = 0; i < init_sz; ++i) { _sinit_array[i](); }
 }
 
+static void m_setDerivedClocks()
+{
+    /* APB2 Clock must not exceed 108 MHz, the AHB clock is coming in @216 so we
+     * divide it by 2 */
+    RCC->CFGR &= ~RCC_CFGR_PPRE2;
+    RCC->CFGR |= RCC_CFGR_PPRE2_DIV2;
+}
+
 
 /*******************************************************************************
  * EXTERN FUNCTION IMPLEMENTATIONS
@@ -620,6 +629,7 @@ void handleReset(void)
     m_initFMC();
     m_cleanupTimer();
     m_initStaticObjects();
+    m_setDerivedClocks();
 
     __asm__("B main");
 }

@@ -1,6 +1,8 @@
 
 /*******************************************************************************
- * Control global level interrupts
+ * Control global level interrupts. Each handler will request the matching
+ * device from the System singleton and call the corresponding event method. IRQ
+ * flags should be cleared by IRQs handler, **not** by event methods.
  ******************************************************************************/
 
 #ifndef _HAL_DEVICE_STM32F750_IRQS_HPP
@@ -40,6 +42,7 @@ extern "C" {
 
 void handleTIM2Event(void);
 void handleTIM5Event(void);
+void handleUSART1Event(void);
 }
 }  // namespace device
 }  // namespace hal

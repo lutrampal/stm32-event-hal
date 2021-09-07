@@ -12,6 +12,7 @@
 
 #include <exception>
 #include <hardware/mcu.hpp>
+#include <string>
 
 namespace hal
 {
@@ -42,7 +43,35 @@ struct InvalidTimerIdException : SystemException {
 
     const char* what() const noexcept override
     {
-        return "Invalid timer ID";
+        return (std::string{"Invalid timer ID: "} + std::to_string(id)).c_str();
+    }
+};
+
+struct InvalidUartIdException : SystemException {
+    unsigned id;
+
+    InvalidUartIdException(unsigned id): id{id}
+    {
+    }
+
+    const char* what() const noexcept override
+    {
+        return (std::string{"Invalid UART ID: "} + std::to_string(id)).c_str();
+    }
+};
+
+struct UnimplementedDeviceException : SystemException {
+    std::string device_name;
+
+    UnimplementedDeviceException(std::string&& device_name)
+    : device_name{device_name}
+    {
+    }
+
+    const char* what()
+    {
+        return (std::string{"Unimplemented hardware device: "} + device_name)
+            .c_str();
     }
 };
 
