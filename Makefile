@@ -23,7 +23,7 @@ LFLAGS = -T $(LD_SCRIPT) -Wl,--gc-sections -Wl,-L./ld \
 
 INCLUDES = -I./include -I./src/
 SRC_DIR = ./src
-ALL_SRC_DIRS = $(SRC_DIR) ./src/device ./src/driver ./src/hardware
+ALL_SRC_DIRS = $(SRC_DIR) ./src/device ./src/driver ./src/hardware ./src/component
 ALL_BUILD_DIRS = $(subst $(SRC_DIR), $(BUILD_DIR), $(ALL_SRC_DIRS))
 CXX_EXT = cpp
 DEFINES ?=
