@@ -36,9 +36,9 @@ hal::driver::TimerDriver::Timer hal::driver::TimerDriver::asyncWait(
         chrono::duration_cast<TimerDevice::WaitTimeUnitDuration>(wait_time);
 
     if (wait_queue.empty()) {
-        device.startWait(dev_wait_duration.count());
         wait_queue.push_front(
             WaitOp{handle, dev_wait_duration, event_callback});
+        device.startWait(dev_wait_duration.count());
         return timer;
     }
 
@@ -56,10 +56,10 @@ hal::driver::TimerDriver::Timer hal::driver::TimerDriver::asyncWait(
             throw StartAsyncOpFailure{"Couldn't reschedule wait on device"};
         }
 
-        device.startWait(dev_wait_duration.count());
         wait_queue.front().wait_time = remaining_wait_time - dev_wait_duration;
         wait_queue.push_front(
             WaitOp{handle, dev_wait_duration, event_callback});
+        device.startWait(dev_wait_duration.count());
     } else {
         /* The new wait op won't be started immediately. We need to
          * schedule it:
@@ -78,9 +78,9 @@ hal::driver::TimerDriver::Timer hal::driver::TimerDriver::asyncWait(
         if (it != wait_queue.end()) {
             it->wait_time -= dev_wait_duration;
         }
-    }
 
-    device.resumeWait();
+        device.resumeWait();
+    }
 
     return timer;
 }
