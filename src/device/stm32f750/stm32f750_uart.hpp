@@ -39,10 +39,17 @@ class Stm32f750Uart : public CharacterDevice<char>
     /** This method should be called in the interrupt handler to signal to the
      * device that new data may be transmitted. */
     void onTransmitDataRegisterEmpty();
+    /** This method should be called in the interrupt handler to signal to the
+     * device that new data was received. */
+    void onReceiveDataRegisterNotEmpty();
 
     void startWrite(const char* buf, size_t buf_size) override;
-    bool suspendWrite() override;
-    bool resumeWrite() override;
+    bool cancelWrite() override;
+
+    void startRead(char* buf,
+                   size_t buf_size,
+                   std::optional<char> stop_char = std::nullopt) override;
+    bool cancelRead() override;
 
   private:
     USART_TypeDef* const uart;

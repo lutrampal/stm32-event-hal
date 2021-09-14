@@ -11,6 +11,8 @@ _min_ram_left = 0x400;
 MEMORY
 {
     FLASH       (rxw) : ORIGIN = 0x08000000, LENGTH = 64K
+    /* TODO: This is not currently used but we could store some code that needs 
+     * to run fast here: e.g. IRQ handlers, device classes... */
     ITCMRAM     (rxw) : ORIGIN = 0x00000000, LENGTH = 16K
     /* Split the DTCM RAM, we'll store the IRQ table right at the end of it and 
      * the rest will be dedicated to the stack. */

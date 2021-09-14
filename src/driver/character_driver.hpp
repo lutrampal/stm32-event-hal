@@ -44,16 +44,46 @@ class CharacterDriver
         size_t nb_elem,
         std::function<void(size_t, device::ErrorStatus&)>&& event_callback =
             std::function<void(size_t, device::ErrorStatus&)>{});
+    /** Cancel the currently running write operation.
+     * If no write op is running then @ref CancelAsyncOpFailure will be raised.
+     * The callback given when calling @ref asyncWrite previously will be called
+     * with the Aborted status code. */
+    void cancelAsyncWrite();
+
+    /** Start an asynchronous read operation on the character device
+     * @param buf
+     *  A buffer where read characters will be copied
+     * @param nb_elem
+     *  The number of elements to read at most (= size of the given @ref buf)
+     * @param stop_char
+     *  Read will stop if this char is encountered, even if the buffer isn't
+     * full
+     * @param event_callback
+     *  The event which will be published to the queue once the read operation
+     * is complete/canceled. The callback will receive the number of bytes
+     * read and an error status as parameters.
+     * The given callback std::function may be empty, in which case no event
+     * will be published to the queue. */
+    void asyncRead(
+        T* buf,
+        size_t nb_elem,
+        std::function<void(size_t, device::ErrorStatus&)>&& event_callback =
+            std::function<void(size_t, device::ErrorStatus&)>{},
+        std::optional<T> stop_char = std::nullopt);
+    /** Cancel the currently running read operation.
+     * If no read op is running then @ref CancelAsyncOpFailure will be raised.
+     * The callback given when calling @ref asyncRead previously will be called
+     * with the Aborted status code. */
+    void cancelAsyncRead();
 
   private:
-    struct WriteOp {
-        std::function<void(size_t, device::ErrorStatus&)> callback;
-        const T* buf;
-        size_t nb_elem;
-    };
-    std::list<WriteOp> write_queue;
+    bool busy_w = false;
+    std::function<void(size_t, device::ErrorStatus&)> write_callback;
+    bool busy_r = false;
+    std::function<void(size_t, device::ErrorStatus&)> read_callback;
 
     void completeWrite(size_t nb_written, hal::device::ErrorStatus&& status);
+    void completeRead(size_t nb_read, hal::device::ErrorStatus&& status);
 
     EventLoop& event_loop;
     device::CharacterDevice<T>& device;

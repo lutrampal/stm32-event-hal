@@ -15,12 +15,11 @@ OS ?= arm-none-eabi-size
 GDB ?= arm-none-eabi-gdb
 
 WFLAGS ?= -Wall -Wpedantic -Wextra -Wno-unused-parameter
-CXXFLAGS = -c -mcpu=$(MCU) -mthumb -mhard-float -mfloat-abi=hard -fexceptions \
-	-mfpu=fpv5-sp-d16 -ffunction-sections -fdata-sections -std=c++17 \
-	 -specs=nosys.specs $(WFLAGS)
-LFLAGS = -T $(LD_SCRIPT) -mcpu=$(MCU) -mthumb -lstdc++ -mhard-float \
-	-mfloat-abi=hard -mfpu=fpv5-sp-d16 -Wl,--gc-sections -Wl,-L./ld \
-	 -specs=nosys.specs $(WFLAGS)
+ARMFLAGS = -mcpu=$(MCU) -mthumb -mhard-float -mfloat-abi=hard -mfpu=fpv5-sp-d16
+CXXFLAGS = -c -fexceptions -ffunction-sections -fdata-sections -std=c++17 \
+	-specs=nosys.specs $(ARMFLAGS) $(WFLAGS)
+LFLAGS = -T $(LD_SCRIPT) -Wl,--gc-sections -Wl,-L./ld \
+	-specs=nosys.specs $(ARMFLAGS) $(WFLAGS) 
 
 INCLUDES = -I./include -I./src/
 SRC_DIR = ./src

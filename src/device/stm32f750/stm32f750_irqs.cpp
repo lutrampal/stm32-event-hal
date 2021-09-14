@@ -12,6 +12,7 @@
 #include "stm32f750_timer.hpp"
 #include "stm32f750_uart.hpp"
 
+#include <cstdio>
 #include <device/system.hpp>
 #include <exception>
 #include <hardware/mcu.hpp>
@@ -32,7 +33,7 @@ __attribute__((aligned(0x200))) __attribute__((
  * STATIC FUNCTION IMPLEMENTATIONS
  ******************************************************************************/
 
-static inline void handle_timer_event(TIM_TypeDef* timer, unsigned id)
+static inline void mHandleTimerEvent(TIM_TypeDef* timer, unsigned id)
 {
     if ((timer->SR & TIM_SR_UIF) == TIM_SR_UIF) {
         /* clear interrupt */
@@ -42,8 +43,35 @@ static inline void handle_timer_event(TIM_TypeDef* timer, unsigned id)
                 .onUpdateInterrupt();
         } catch (const std::exception& e) {
             // TODO: Is there anything better we can do here?
+            printf("%s\r\n", e.what());
             handleError();
         }
+    }
+}
+
+static inline void mHandleUartEvent(USART_TypeDef* uart, unsigned id)
+{
+    try {
+        uint32_t cr1 = uart->CR1;
+        uint32_t isr = uart->ISR;
+        if ((cr1 & USART_CR1_TXEIE) && (isr & USART_ISR_TXE)) {
+            /* Transmit data registry empty and we want to send data.
+             * TXE bit will be cleared when writing the next char to the TDR
+             * register in the following call. */
+            static_cast<Stm32f750Uart&>(System::getInstance().getUart(id))
+                .onTransmitDataRegisterEmpty();
+        }
+        if ((cr1 & USART_CR1_RXNEIE) && (isr & USART_ISR_RXNE)) {
+            /* Receive data registry not empty and we're expecting data.
+             * RXNE will be cleared when reading the next char from the RDR
+             * register in the following call. */
+            static_cast<Stm32f750Uart&>(System::getInstance().getUart(id))
+                .onReceiveDataRegisterNotEmpty();
+        }
+    } catch (const std::exception& e) {
+        // TODO: Is there anything better we can do here?
+        printf("%s\r\n", e.what());
+        handleError();
     }
 }
 
@@ -59,21 +87,16 @@ void handleError(void)
 
 void handleTIM2Event(void)
 {
-    handle_timer_event(TIM2, 2);
+    mHandleTimerEvent(TIM2, 2);
 }
 
 void handleTIM5Event(void)
 {
-    handle_timer_event(TIM5, 5);
+    mHandleTimerEvent(TIM5, 5);
 }
 
 void handleUSART1Event(void)
 {
-    if (USART1->ISR & USART_ISR_TXE) {
-        /* Transmit data registry empty, this bit will be cleared when writing
-         * the next char to TDR register in the following call. */
-        static_cast<Stm32f750Uart&>(System::getInstance().getUart(1))
-            .onTransmitDataRegisterEmpty();
-    }
+    mHandleUartEvent(USART1, 1);
 }
 }

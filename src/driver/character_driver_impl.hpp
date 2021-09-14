@@ -22,6 +22,8 @@ hal::driver::CharacterDriver<T>::CharacterDriver(
 
     device.setWriteCompleteCallback(bind(&CharacterDriver::completeWrite, this,
                                          placeholders::_1, placeholders::_2));
+    device.setReadCompleteCallback(bind(&CharacterDriver::completeRead, this,
+                                        placeholders::_1, placeholders::_2));
 }
 
 /*******************************************************************************
@@ -50,26 +52,13 @@ void hal::driver::CharacterDriver<T>::asyncWrite(
     using namespace std;
     using namespace hal::device;
 
-    if (!write_queue.empty()) {
-        /* A write op is running, suspend it as we don't want the interrupt to
-         * go off while we're updating the internals of the class */
-        if (!device.suspendWrite()) {
-            throw StartAsyncOpFailure{};
-        }
-
-        write_queue.push_back(WriteOp{event_callback, buf, nb_elem});
-        /* Nothing more to do but resume */
-        if (!device.resumeWrite()) {
-            /* Resume fail so we won't be able to start the new write => pop it
-             * back */
-            write_queue.pop_back();
-            throw StartAsyncOpFailure{};
-        }
-    } else {
-        /* We only have one write op going => start it immediately */
-        write_queue.push_back(WriteOp{event_callback, buf, nb_elem});
-        device.startWrite(buf, nb_elem);
+    if (busy_w) {
+        throw StartAsyncOpFailure{"Driver is busy"};
     }
+
+    device.startWrite(buf, nb_elem);
+    busy_w         = true;
+    write_callback = event_callback;
 }
 
 template<typename T>
@@ -77,15 +66,71 @@ void hal::driver::CharacterDriver<T>::completeWrite(
     size_t nb_written,
     hal::device::ErrorStatus&& status)
 {
-    if (write_queue.front().callback) {
-        event_loop.pushEvent(
-            bind(write_queue.front().callback, nb_written, status));
+    if (write_callback) {
+        event_loop.pushEvent(bind(write_callback, nb_written, status));
     }
 
-    write_queue.pop_front();
+    busy_w = false;
+}
 
-    if (!write_queue.empty()) {
-        WriteOp next_op = write_queue.front();
-        device.startWrite(next_op.buf, next_op.nb_elem);
+template<typename T>
+void hal::driver::CharacterDriver<T>::cancelAsyncWrite()
+{
+    using namespace hal::device;
+
+    if (!busy_w) {
+        throw CancelAsyncOpFailure{"Nothing to cancel"};
     }
+
+    if (!device.cancelWrite()) {
+        throw CancelAsyncOpFailure{"Failed to cancel operation"};
+    }
+
+    busy_w = false;
+}
+template<typename T>
+void hal::driver::CharacterDriver<T>::asyncRead(
+    T* buf,
+    size_t nb_elem,
+    std::function<void(size_t, hal::device::ErrorStatus&)>&& event_callback,
+    std::optional<T> stop_char)
+{
+    using namespace std;
+    using namespace hal::device;
+
+    if (busy_r) {
+        throw StartAsyncOpFailure{"Driver is busy"};
+    }
+
+    device.startRead(buf, nb_elem, stop_char);
+    busy_r        = true;
+    read_callback = event_callback;
+}
+
+template<typename T>
+void hal::driver::CharacterDriver<T>::completeRead(
+    size_t nb_read,
+    hal::device::ErrorStatus&& status)
+{
+    if (read_callback) {
+        event_loop.pushEvent(bind(read_callback, nb_read, status));
+    }
+
+    busy_r = false;
+}
+
+template<typename T>
+void hal::driver::CharacterDriver<T>::cancelAsyncRead()
+{
+    using namespace hal::device;
+
+    if (!busy_r) {
+        throw CancelAsyncOpFailure{"Nothing to cancel"};
+    }
+
+    if (!device.cancelRead()) {
+        throw CancelAsyncOpFailure{"Failed to cancel operation"};
+    }
+
+    busy_r = false;
 }

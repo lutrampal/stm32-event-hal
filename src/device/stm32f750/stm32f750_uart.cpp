@@ -9,7 +9,6 @@
 
 #include "stm32f750_uart.hpp"
 
-#include <device/exceptions/character_device_exceptions.hpp>
 #include <hardware/mcu.hpp>
 
 using namespace std;
@@ -31,6 +30,11 @@ Stm32f750Uart::Stm32f750Uart(USART_TypeDef* uart,
 
     uint16_t usartdiv = apb2_clk_hz / baudrate;
     uart->BRR         = usartdiv;
+    /* There's not much we can do in case of overrun error so we'll just disable
+     * it.
+     * It could be used for debugging though if you're experiencing glitches
+     * during UART com. */
+    uart->CR3 |= USART_CR3_OVRDIS;
 
     NVIC_EnableIRQ(irq_nb);
 }
@@ -39,6 +43,7 @@ Stm32f750Uart::~Stm32f750Uart()
 {
     NVIC_DisableIRQ(irq_nb);
 
+    uart->CR1 = 0;
     *clk_en_reg &= ~clk_en_msk;
 }
 
@@ -71,42 +76,82 @@ void Stm32f750Uart::onTransmitDataRegisterEmpty()
                                     ErrorStatus{ErrorCode::Success});
         }
     } else {
-        while (uart->ISR & USART_ISR_TXE && nb_written < nb_to_write) {
-            uart->TDR = buf[nb_written];
+        while ((uart->ISR & USART_ISR_TXE) && (nb_written < nb_to_write)) {
+            uart->TDR = buf_out[nb_written];
             nb_written++;
         }
     }
     /* IRQ flag is cleared by the IRQ handler which called this method */
 }
 
+void Stm32f750Uart::onReceiveDataRegisterNotEmpty()
+{
+    do {
+        buf_in[nb_read] = uart->RDR;
+        nb_read++;
+
+        if ((nb_read == nb_to_read)
+            || (buf_in[nb_read - 1] == read_stop_char)) {
+            /* We're done reading, disable the emitter, call the callback and
+             * return */
+            uart->CR1 &= ~USART_CR1_RE & ~USART_CR1_RXNEIE;
+            nb_to_read = 0;
+            if (read_complete_callback) {
+                read_complete_callback(nb_read,
+                                       ErrorStatus{ErrorCode::Success});
+            }
+        }
+    } while (uart->ISR & USART_ISR_RXNE);
+}
+
 void Stm32f750Uart::startWrite(const char* buf, size_t buf_size)
 {
-    this->buf   = buf;
-    nb_to_write = buf_size;
-    nb_written  = 0;
+    this->buf_out = buf;
+    nb_to_write   = buf_size;
+    nb_written    = 0;
 
     /* Enable USART, Transmitter and TX interrupt */
     uart->CR1 |= USART_CR1_UE | USART_CR1_TE | USART_CR1_TXEIE;
 }
 
-bool Stm32f750Uart::suspendWrite()
+bool Stm32f750Uart::cancelWrite()
 {
     if (nb_to_write == 0) {
-        /* Nothing to suspend */
+        /* Nothing to cancel */
         return false;
     }
 
+    nb_to_write = 0;
     uart->CR1 &= ~USART_CR1_TE & ~USART_CR1_TXEIE;
+
+    write_complete_callback(nb_written, ErrorStatus{ErrorCode::Aborted});
     return true;
 }
 
-bool Stm32f750Uart::resumeWrite()
+
+void Stm32f750Uart::startRead(char* buf,
+                              size_t buf_size,
+                              std::optional<char> stop_char)
 {
-    if (nb_to_write == 0) {
-        /* Nothing to resume */
+    this->buf_in   = buf;
+    nb_to_read     = buf_size;
+    nb_read        = 0;
+    read_stop_char = stop_char;
+
+    /* Enable USART, Emitter and RX interrupt */
+    uart->CR1 |= USART_CR1_UE | USART_CR1_RE | USART_CR1_RXNEIE;
+}
+
+bool Stm32f750Uart::cancelRead()
+{
+    if (nb_to_read == 0) {
+        /* Nothing to cancel */
         return false;
     }
 
-    uart->CR1 |= USART_CR1_TE | USART_CR1_TXEIE;
+    nb_to_read = 0;
+    uart->CR1 &= ~USART_CR1_RE & ~USART_CR1_RXNEIE;
+
+    read_complete_callback(nb_read, ErrorStatus{ErrorCode::Aborted});
     return true;
 }

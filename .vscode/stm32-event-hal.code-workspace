@@ -64,7 +64,8 @@
             "chrono": "cpp",
             "ctime": "cpp",
             "ratio": "cpp",
-            "stm32f750.hpp": "c"
+            "stm32f750.hpp": "c",
+            "cstring": "cpp"
         },
         "editor.rulers": [
             80
@@ -132,7 +133,8 @@
                 "gdbPath": "${env:GDB}",
                 "svdFile": "${env:STM32_SVD_FILE}",
                 "overrideLaunchCommands": [
-                    "load"
+                    "load",
+                    "b handleError"
                 ],
                 "runToMain": true,
                 "preLaunchTask": "Build",
