@@ -1,11 +1,7 @@
 
 /*******************************************************************************
- * This code is responsible for:
- * - Copying mutable data from flash to SRAM
- * - Initializing vector table and copying handler code to ITCM
- * - Initializing SDRAM
- * - Initializing QSPI
- * - Handing over to main()
+ * This code is responsible for all tasks that must be done before handing over
+ * to main() (e.g. Setting up SDRAM, QSPI, core speed, vector table...)
  ******************************************************************************/
 
 #include <cstddef>
@@ -147,6 +143,44 @@ static constexpr uint32_t m_nsToCycles(uint32_t ns, uint32_t clk_hz)
 {
     uint32_t clk_mhz = clk_hz / 1000000;
     return (clk_mhz * ns) / 1000;
+}
+
+/* When using a STM32F750 with external SDRAM, an unaligned access usage fault
+ * will be triggered when accessing the SDRAM on a non aligned address even if
+ * UNALIGN_TRP is not set.
+ * To circumvent this, we'll setup an MPU region.
+ * cf. https://developer.arm.com/documentation/ka002886/latest */
+static void MPU_Config(void)
+{
+    MPU->CTRL &= ~MPU_CTRL_ENABLE_Msk;
+
+    MPU->RNR = 0 & MPU_RNR_REGION_Msk;
+    /* Configure region 0 as :
+     *  - Starting at 0xC0000000 (= start of SDRAM)
+     *  - Instruction fetch forbidden (XN)
+     *  - Full access (AP)
+     *  - TEX level 1
+     *  - Cacheable (C)
+     *  - Bufferable (B)
+     *  - Non shared (S)
+     *  - Subregions disabled
+     *  - Region enabled */
+    MPU->RBAR = 0xC0000000;
+    MPU->RASR = (0 << MPU_RASR_XN_Pos) | (0b011 << MPU_RASR_AP_Pos)
+                | (0b001 << MPU_RASR_TEX_Pos) | (0b1 << MPU_RASR_C_Pos)
+                | (0b1 << MPU_RASR_B_Pos) | (0b0 << MPU_RASR_S_Pos)
+                | (0x00 << MPU_RASR_SRD_Pos) | (0x16 << MPU_RASR_SIZE_Pos)
+                | (1 << MPU_RASR_ENABLE_Pos);
+
+    /* Enable the MPU */
+    MPU->CTRL = (1 << MPU_CTRL_PRIVDEFENA_Pos) | MPU_CTRL_ENABLE_Msk;
+
+    /* Enable fault exceptions */
+    SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
+
+    /* Ensure MPU setting take effects */
+    __DSB();
+    __ISB();
 }
 
 static void m_initFMC()
@@ -321,6 +355,8 @@ static void m_initFMC()
         m_nsToCycles(ram_refresh_period_ns / nb_rows, sdclk_hz) - margin;
     FMC_Bank5_6->SDRTR &= ~FMC_SDRTR_COUNT;
     FMC_Bank5_6->SDRTR |= count << FMC_SDRTR_COUNT_Pos;
+
+    MPU_Config();
 }
 
 static void m_qspiWaitForRegister(uint8_t reg, uint32_t msk, uint32_t match)
@@ -509,13 +545,10 @@ static void m_setCoreSpeed(void)
     /* After increasing the latency, we may change the clock speed */
 
     /* We'll use the PLL (=Phase-Locked Loop) for clock source as it allows
-    for
-     * the highest clock speed. First, we need to configure it */
+     * for the highest clock speed. First, we need to configure it */
 
-    /* The PLL uses as clock source an external oscillator (HSE) which
-    frequency
-     * it will multiply to get a faster clock to the CPU. We need to enable
-     the
+    /* The PLL uses as clock source an external oscillator (HSE) which frequency
+     * it will multiply to get a faster clock to the CPU. We need to enable the
      * HSE first and wait for it to be ready. */
     RCC->CR |= RCC_CR_HSEON;
     while ((RCC->CR & RCC_CR_HSERDY) != RCC_CR_HSERDY) {}
@@ -630,6 +663,8 @@ void handleReset(void)
     m_cleanupTimer();
     m_initStaticObjects();
     m_setDerivedClocks();
+
+    SCB->CPACR = 0b1111 << 20; /* Enable FPU */
 
     __asm__("B main");
 }
