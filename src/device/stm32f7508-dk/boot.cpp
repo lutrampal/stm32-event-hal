@@ -279,16 +279,16 @@ static void m_initFMC()
     FMC_Bank5_6->SDCR[0] &= ~FMC_SDCR1_RPIPE;
     FMC_Bank5_6->SDCR[0] |= 0b00 << FMC_SDCR1_RPIPE_Pos;
     /* Disable burst read */
-    FMC_Bank5_6->SDCR[0] |= FMC_SDCR1_RBURST;
+    FMC_Bank5_6->SDCR[0] &= ~FMC_SDCR1_RBURST;  // TODO: maybe enable this
     /* 2 CPU clock cycles per SDRAM clock cycle */
     uint32_t sdclk_div = 2;
     FMC_Bank5_6->SDCR[0] &= ~FMC_SDCR1_SDCLK;
     FMC_Bank5_6->SDCR[0] |= sdclk_div << FMC_SDCR1_SDCLK_Pos;
     /* Allow write access */
     FMC_Bank5_6->SDCR[0] &= ~FMC_SDCR1_WP;
-    /* 3 CPU clock cycles for CAS latency */
+    /* 2 memory clock cycles for CAS latency */
     FMC_Bank5_6->SDCR[0] &= ~FMC_SDCR1_CAS;
-    FMC_Bank5_6->SDCR[0] |= 0b11 << FMC_SDCR1_CAS_Pos;
+    FMC_Bank5_6->SDCR[0] |= 0b10 << FMC_SDCR1_CAS_Pos;
     /* 4 internal banks for our module */
     FMC_Bank5_6->SDCR[0] |= FMC_SDCR1_NB;
     /* 16-bit data bus */
@@ -308,14 +308,13 @@ static void m_initFMC()
     FMC_Bank5_6->SDTR[0] &= ~FMC_SDTR1_TRCD & ~FMC_SDTR1_TRP & ~FMC_SDTR1_TWR
                             & ~FMC_SDTR1_TRC & ~FMC_SDTR1_TRAS & ~FMC_SDTR1_TXSR
                             & ~FMC_SDTR1_TMRD;
-    FMC_Bank5_6->SDTR[0] |=
-        ((m_nsToCycles(sdram_trcd_ns, sdclk_hz) - 1) << FMC_SDTR1_TRCD_Pos)
-        | ((m_nsToCycles(sdram_trp_ns, sdclk_hz) - 1) << FMC_SDTR1_TRP_Pos)
-        | ((m_nsToCycles(sdram_twr_ns, sdclk_hz) - 1) << FMC_SDTR1_TWR_Pos)
-        | ((m_nsToCycles(sdram_trc_ns, sdclk_hz) - 1) << FMC_SDTR1_TRC_Pos)
-        | ((m_nsToCycles(sdram_tras_ns, sdclk_hz) - 1) << FMC_SDTR1_TRAS_Pos)
-        | ((m_nsToCycles(sdram_txsr_ns, sdclk_hz) - 1) << FMC_SDTR1_TXSR_Pos)
-        | ((m_nsToCycles(sdram_tmrd_ns, sdclk_hz) - 1) << FMC_SDTR1_TMRD_Pos);
+    FMC_Bank5_6->SDTR[0] |= ((sdram_trcd - 1) << FMC_SDTR1_TRCD_Pos)
+                            | ((sdram_trp - 1) << FMC_SDTR1_TRP_Pos)
+                            | ((sdram_twr - 1) << FMC_SDTR1_TWR_Pos)
+                            | ((sdram_trc - 1) << FMC_SDTR1_TRC_Pos)
+                            | ((sdram_tras - 1) << FMC_SDTR1_TRAS_Pos)
+                            | ((sdram_txsr - 1) << FMC_SDTR1_TXSR_Pos)
+                            | ((sdram_tmrd - 1) << FMC_SDTR1_TMRD_Pos);
 
     /* SDRAM init: step 3, issue clock config enable command */
     FMC_Bank5_6->SDCMR &= ~FMC_SDCMR_MODE;
@@ -343,7 +342,7 @@ static void m_initFMC()
      * = 0, write burst mode = 0 */
     FMC_Bank5_6->SDCMR &= ~FMC_SDCMR_MODE & ~FMC_SDCMR_MRD;
     FMC_Bank5_6->SDCMR |= FMC_SDCMR_CTB1
-                          | ((3 << MRD_LatencyMode_Pos) << FMC_SDCMR_MRD_Pos)
+                          | ((2 << MRD_LatencyMode_Pos) << FMC_SDCMR_MRD_Pos)
                           | (0b100 << FMC_SDCMR_MODE_Pos);
     while (FMC_Bank5_6->SDSR & FMC_SDSR_BUSY) {}
 

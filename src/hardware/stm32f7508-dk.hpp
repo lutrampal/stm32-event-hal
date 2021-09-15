@@ -352,13 +352,13 @@ constexpr unsigned MRD_WriteBurstMode_Pos = 9;
 constexpr unsigned MRD_WriteBurstMode_Msk = 0b1 << MRD_WriteBurstMode_Pos;
 constexpr unsigned MRD_WriteBurstMode     = MRD_WriteBurstMode_Msk;
 
-constexpr unsigned sdram_trcd_ns = 18;
-constexpr unsigned sdram_trp_ns  = 18;
-constexpr unsigned sdram_twr_ns  = 24;
-constexpr unsigned sdram_trc_ns  = 60;
-constexpr unsigned sdram_tras_ns = 42;
-constexpr unsigned sdram_txsr_ns = 70;
-constexpr unsigned sdram_tmrd_ns = 12;
+constexpr unsigned sdram_trcd = 2;
+constexpr unsigned sdram_trp  = 2;
+constexpr unsigned sdram_twr  = 2;
+constexpr unsigned sdram_trc  = 7;
+constexpr unsigned sdram_tras = 5;
+constexpr unsigned sdram_txsr = 8;
+constexpr unsigned sdram_tmrd = 2;
 
 constexpr unsigned screen_hsync  = 41;
 constexpr unsigned screen_hbp    = 13;
