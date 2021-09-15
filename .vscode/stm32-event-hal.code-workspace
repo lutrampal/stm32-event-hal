@@ -83,7 +83,8 @@
                 "type": "shell",
                 "command": "make",
                 "args": [
-                    "all"
+                    "all",
+                    "LOG_LEVEL=DEBUG"
                 ],
                 "problemMatcher": [
                     "$gcc"
@@ -134,7 +135,7 @@
                 "svdFile": "${env:STM32_SVD_FILE}",
                 "overrideLaunchCommands": [
                     "load",
-                    "b handleError"
+                    "tb handleError"
                 ],
                 "runToMain": true,
                 "preLaunchTask": "Build",

@@ -26,7 +26,7 @@ SRC_DIR = ./src
 ALL_SRC_DIRS = $(SRC_DIR) ./src/device ./src/driver ./src/hardware ./src/component
 ALL_BUILD_DIRS = $(subst $(SRC_DIR), $(BUILD_DIR), $(ALL_SRC_DIRS))
 CXX_EXT = cpp
-DEFINES ?=
+DEFINES ?= -DLOG_LEVEL=LOG_LEVEL_$(LOG_LEVEL)
 
 ifeq ($(BUILD_TYPE),debug)
 	CXXFLAGS += -O0 -g3

@@ -16,6 +16,7 @@
 #include "timer_device.hpp"
 
 #include <array>
+#include <event_loop.hpp>
 #include <hardware/mcu.hpp>
 #include <memory>
 
@@ -38,6 +39,7 @@ class System
      * TIM2 */
     TimerDevice& getTimer(unsigned id);
     CharacterDevice<char>& getUart(unsigned id);
+    EventLoop& getEventLoop();
 
   private:
     System();
@@ -45,6 +47,7 @@ class System
 
     std::array<std::unique_ptr<TimerDevice>, nb_timers> timers;
     std::array<std::unique_ptr<CharacterDevice<char>>, nb_uarts> uarts;
+    EventLoop event_loop;
 };
 
 }  // namespace device

@@ -96,9 +96,10 @@ int hal::component::CharacterStreamBuffer<T>::sync()
     }
 
     /* Assumption: The size of all writes on this stream will be roughly the
-     * same so we allocated new output buffer with the same capacity as the
+     * same so we pre-allocate new output buffer with the same capacity as the
      * previous one. */
-    buf_out.reset(new vector<T>(pending_out.back()->capacity()));
+    buf_out.reset(new vector<T>);
+    buf_out->reserve(pending_out.back()->capacity());
     this->setp(buf_out->data(), buf_out->data() + buf_out->capacity());
 
     return 0;

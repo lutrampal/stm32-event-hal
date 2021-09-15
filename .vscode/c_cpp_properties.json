@@ -8,7 +8,8 @@
             "defines": [
                 "${env:STM32_MCU}",
                 "${env:STM32_BOARD}",
-                "DEBUG"
+                "DEBUG",
+                "LOG_LEVEL=LOG_LEVEL_TRACE"
             ],
             "compilerPath": "/bin/arm-none-eabi-g++",
             "cStandard": "gnu17",

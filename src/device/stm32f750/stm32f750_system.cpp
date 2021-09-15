@@ -16,7 +16,8 @@
 #include <hardware/mcu.hpp>
 
 using namespace std;
-using namespace hal::device;
+using namespace hal;
+using namespace device;
 
 
 /*******************************************************************************
@@ -176,10 +177,10 @@ CharacterDevice<char>& System::getUart(unsigned id)
             case 1:
                 RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN; /* VCP_RX */
                 RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN; /* VCP_TX */
-                gpioFunctionConfigure(GPIOA, 9, SelFunc::Alt7,
-                                      PinSpeed::Medium);
-                gpioFunctionConfigure(GPIOB, 7, SelFunc::Alt7,
-                                      PinSpeed::Medium);
+                gpioFunctionConfigure(VCP_TX_GPIO_Port, VCP_TX_Pin,
+                                      SelFunc::Alt7, PinSpeed::Medium);
+                gpioFunctionConfigure(VCP_RX_GPIO_Port, VCP_RX_Pin,
+                                      SelFunc::Alt7, PinSpeed::Medium);
                 uarts[0] = make_unique<Stm32f750Uart>(
                     USART1, USART1_IRQn, &RCC->APB2ENR, RCC_APB2ENR_USART1EN,
                     uart_baudrate);
@@ -240,4 +241,9 @@ CharacterDevice<char>& System::getUart(unsigned id)
     }
 
     return *uarts[id - 1];
+}
+
+EventLoop& System::getEventLoop()
+{
+    return event_loop;
 }

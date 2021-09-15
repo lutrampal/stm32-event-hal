@@ -373,5 +373,6 @@ constexpr unsigned screen_vs_pol = 0;
 constexpr unsigned screen_pc_pol = 0;
 constexpr unsigned screen_de_pol = 0;
 
+constexpr unsigned logging_uart_id = 1;
 
 #endif
