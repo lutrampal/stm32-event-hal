@@ -10,6 +10,8 @@
  * INCLUDE DIRECTIVES
  ******************************************************************************/
 
+#include "device_exceptions.hpp"
+
 #include <device/timer_device.hpp>
 #include <exception>
 #include <hardware/mcu.hpp>
@@ -23,13 +25,12 @@ namespace device
  * TYPE DEFINITIONS
  ******************************************************************************/
 
-struct TimerException : std::exception {
+struct TimerException : DeviceException {
     virtual const char* what() const noexcept override
     {
         return "Unspecified Timer exception";
     }
 
-  protected:
     TimerException()
     {
     }

@@ -28,7 +28,6 @@ struct SystemException : std::exception {
         return "Unspecified system exception";
     }
 
-  protected:
     SystemException()
     {
     }
@@ -57,6 +56,19 @@ struct InvalidUartIdException : SystemException {
     const char* what() const noexcept override
     {
         return (std::string{"Invalid UART ID: "} + std::to_string(id)).c_str();
+    }
+};
+
+struct InvalidDmaIdException : SystemException {
+    unsigned id;
+
+    InvalidDmaIdException(unsigned id): id{id}
+    {
+    }
+
+    const char* what() const noexcept override
+    {
+        return (std::string{"Invalid DMA ID: "} + std::to_string(id)).c_str();
     }
 };
 
