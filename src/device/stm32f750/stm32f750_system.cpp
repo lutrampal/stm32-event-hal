@@ -10,6 +10,7 @@
 #include "stm32f750_dma.hpp"
 #include "stm32f750_timer.hpp"
 #include "stm32f750_uart.hpp"
+#include "stm32f750_uart_with_dma.hpp"
 
 #include <device/exceptions/system_exceptions.hpp>
 #include <device/gpio_function.hpp>
@@ -294,6 +295,68 @@ DmaDevice& System::getDma(unsigned id)
     }
 
     return *dmas[id - 1];
+}
+
+
+CharacterDevice<char>& System::getUartWithDma(unsigned id)
+{
+    if (id < 1 || id > nb_uarts) {
+        throw InvalidUartIdException(id);
+    }
+
+    /* IDs start at 1
+     * UART objects are not constructed at startup but only when they are
+     * requested.
+     * We must also setup the GPIOs */
+    if (uarts_with_dma[id - 1] == nullptr) {
+        switch (id) {
+            case 1:
+                RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN; /* VCP_RX */
+                RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN; /* VCP_TX */
+                gpioFunctionConfigure(VCP_TX_GPIO_Port, VCP_TX_Pin,
+                                      SelFunc::Alt7, PinSpeed::Medium);
+                gpioFunctionConfigure(VCP_RX_GPIO_Port, VCP_RX_Pin,
+                                      SelFunc::Alt7, PinSpeed::Medium);
+
+                uarts_with_dma[0] = make_unique<Stm32f750UartWithDma>(
+                    USART1, &RCC->APB2ENR, RCC_APB2ENR_USART1EN, uart_baudrate,
+                    static_cast<Stm32f750Dma&>(getDma(2)), 5, 4, 7, 4);
+                break;
+            case 2:
+                /* TODO: GPIO setup */
+                throw UnimplementedDeviceException("USART2 with DMA");
+                break;
+            case 3:
+                /* TODO: GPIO setup */
+                throw UnimplementedDeviceException("USART3 with DMA");
+                break;
+            case 4:
+                /* TODO: GPIO setup */
+                throw UnimplementedDeviceException("UART4 with DMA");
+                break;
+            case 5:
+                /* TODO: GPIO setup */
+                throw UnimplementedDeviceException("UART5 with DMA");
+                break;
+            case 6:
+                /* TODO: GPIO setup */
+                throw UnimplementedDeviceException("USART6 with DMA");
+                break;
+            case 7:
+                /* TODO: GPIO setup */
+                throw UnimplementedDeviceException("UART7 with DMA");
+                break;
+            case 8:
+                /* TODO: GPIO setup */
+                throw UnimplementedDeviceException("UART8 with DMA");
+                break;
+
+            default:
+                throw InvalidUartIdException(id);
+        }
+    }
+
+    return *uarts_with_dma[id - 1];
 }
 
 EventLoop& System::getEventLoop()

@@ -39,7 +39,7 @@ using namespace device;
 
 Logger::Logger()
 : driver{System::getInstance().getEventLoop(),
-         System::getInstance().getUart(logging_uart_id)},
+         System::getInstance().getUartWithDma(logging_uart_id)},
   buffer{driver}, os{&buffer}
 {
 }

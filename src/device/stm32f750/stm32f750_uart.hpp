@@ -52,6 +52,16 @@ class Stm32f750Uart : public CharacterDevice<char>
     bool cancelRead() override;
 
   private:
+    /* Read buffer */
+    char* buf_in;
+    /* Write buffer */
+    const char* buf_out;
+    std::optional<char> read_stop_char;
+    size_t nb_to_write = 0;
+    size_t nb_written  = 0;
+    size_t nb_to_read  = 0;
+    size_t nb_read     = 0;
+
     USART_TypeDef* const uart;
     const IRQn_Type irq_nb;
     volatile uint32_t* const clk_en_reg;

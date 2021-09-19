@@ -46,7 +46,7 @@ class CharacterDevice
      * interrupt context.
      * @param callback
      *  The new callback function. It will receive as paramater the number of
-     * bytes read and an error status indicating if the write operation was
+     * bytes read and an error status indicating if the read operation was
      * succesfully executed or not. */
     void setReadCompleteCallback(
         std::function<void(size_t, ErrorStatus&&)>&& callback)
@@ -80,15 +80,6 @@ class CharacterDevice
     virtual bool cancelRead()                                         = 0;
 
   protected:
-    /* Read buffer */
-    T* buf_in;
-    /* Write buffer */
-    const T* buf_out;
-    std::optional<T> read_stop_char;
-    size_t nb_to_write = 0;
-    size_t nb_written  = 0;
-    size_t nb_to_read  = 0;
-    size_t nb_read     = 0;
     std::function<void(size_t, ErrorStatus&&)> write_complete_callback;
     std::function<void(size_t, ErrorStatus&&)> read_complete_callback;
 };
