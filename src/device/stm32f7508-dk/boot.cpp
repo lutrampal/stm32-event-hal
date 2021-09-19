@@ -525,9 +525,10 @@ static void m_initVtable(void)
     /* All interrupts default to error handler */
     for (unsigned i = 2; i < nb_irqs; ++i) { g_vtable[i] = handleError; }
 
-    g_vtable[TIM2_IRQn + vtable_offset]   = handleTIM2Event;
-    g_vtable[TIM5_IRQn + vtable_offset]   = handleTIM5Event;
-    g_vtable[USART1_IRQn + vtable_offset] = handleUSART1Event;
+    g_vtable[TIM2_IRQn + vtable_offset]         = handleTIM2Event;
+    g_vtable[TIM5_IRQn + vtable_offset]         = handleTIM5Event;
+    g_vtable[USART1_IRQn + vtable_offset]       = handleUSART1Event;
+    g_vtable[DMA2_Stream7_IRQn + vtable_offset] = handleDMA2Stream7Event;
 }
 
 static void m_setCoreSpeed(void)

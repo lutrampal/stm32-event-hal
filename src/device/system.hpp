@@ -1,8 +1,8 @@
 
 /*******************************************************************************
  * Interface file for the system singleton that is responsible for bringing up
- * and down all hardware ressources. It also stores references to these
- * resources for use by other components.
+ * and down all hardware ressources upon request. It also stores references to
+ * these resources for use by other components.
  ******************************************************************************/
 
 #ifndef _HAL_DEVICE_SYSTEM_HPP
@@ -13,6 +13,7 @@
  ******************************************************************************/
 
 #include "character_device.hpp"
+#include "dma_device.hpp"
 #include "timer_device.hpp"
 
 #include <array>
@@ -39,6 +40,8 @@ class System
      * TIM2 */
     TimerDevice& getTimer(unsigned id);
     CharacterDevice<char>& getUart(unsigned id);
+    DmaDevice& getDma(unsigned id);
+
     EventLoop& getEventLoop();
 
   private:
@@ -47,6 +50,8 @@ class System
 
     std::array<std::unique_ptr<TimerDevice>, nb_timers> timers;
     std::array<std::unique_ptr<CharacterDevice<char>>, nb_uarts> uarts;
+    std::array<std::unique_ptr<DmaDevice>, nb_dmas> dmas;
+
     EventLoop event_loop;
 };
 

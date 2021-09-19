@@ -22,6 +22,7 @@ namespace device
 enum class ErrorCode {
     Success,  // Successful completion of operation
     Aborted,  // The operation was cancelled/aborted
+    Failure,  // Failure of operation (unspecified cause)
     NbCodes
 };
 

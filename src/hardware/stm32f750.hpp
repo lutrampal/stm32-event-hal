@@ -39,6 +39,7 @@ constexpr unsigned pllq = 9;
 
 constexpr std::size_t nb_timers = 14;
 constexpr std::size_t nb_uarts  = 8;
+constexpr std::size_t nb_dmas   = 2;
 
 constexpr uint32_t uart_baudrate = 115200;
 

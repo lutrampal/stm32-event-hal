@@ -43,6 +43,7 @@ extern "C" {
 void handleTIM2Event(void);
 void handleTIM5Event(void);
 void handleUSART1Event(void);
+void handleDMA2Stream7Event(void);
 }
 }  // namespace device
 }  // namespace hal

@@ -7,6 +7,7 @@
  * INCLUDE DIRECTIVES
  ******************************************************************************/
 
+#include "stm32f750_dma.hpp"
 #include "stm32f750_timer.hpp"
 #include "stm32f750_uart.hpp"
 
@@ -241,6 +242,58 @@ CharacterDevice<char>& System::getUart(unsigned id)
     }
 
     return *uarts[id - 1];
+}
+
+DmaDevice& System::getDma(unsigned id)
+{
+    if (id < 1 || id > nb_dmas) {
+        throw InvalidUartIdException(id);
+    }
+
+    /* IDs start at 1
+     * DMA objects are not constructed at startup but only when they are
+     * requested. */
+    if (dmas[id - 1] == nullptr) {
+        switch (id) {
+            case 1:
+                dmas[0] = make_unique<Stm32f750Dma>(
+                    DMA1,
+                    array<IRQn_Type, Stm32f750Dma::nb_streams>{
+                        DMA1_Stream0_IRQn,
+                        DMA1_Stream1_IRQn,
+                        DMA1_Stream2_IRQn,
+                        DMA1_Stream3_IRQn,
+                        DMA1_Stream4_IRQn,
+                        DMA1_Stream5_IRQn,
+                        DMA1_Stream6_IRQn,
+                        DMA1_Stream7_IRQn,
+                    },
+                    &RCC->AHB1ENR, RCC_AHB1ENR_DMA1EN, &RCC->AHB1RSTR,
+                    RCC_AHB1RSTR_DMA1RST);
+                break;
+            case 2:
+                dmas[1] = make_unique<Stm32f750Dma>(
+                    DMA2,
+                    array<IRQn_Type, Stm32f750Dma::nb_streams>{
+                        DMA2_Stream0_IRQn,
+                        DMA2_Stream1_IRQn,
+                        DMA2_Stream2_IRQn,
+                        DMA2_Stream3_IRQn,
+                        DMA2_Stream4_IRQn,
+                        DMA2_Stream5_IRQn,
+                        DMA2_Stream6_IRQn,
+                        DMA2_Stream7_IRQn,
+                    },
+                    &RCC->AHB1ENR, RCC_AHB1ENR_DMA2EN, &RCC->AHB1RSTR,
+                    RCC_AHB1RSTR_DMA2RST);
+                break;
+
+            default:
+                throw InvalidDmaIdException(id);
+        }
+    }
+
+    return *dmas[id - 1];
 }
 
 EventLoop& System::getEventLoop()
