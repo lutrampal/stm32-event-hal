@@ -11,11 +11,14 @@
             "mhutchie.git-graph",
             "marus25.cortex-debug",
             "zixuanwang.linkerscript",
-            "xaver.clang-format"
+            "xaver.clang-format",
+            "usernamehw.commands",            
+            "augustocdias.tasks-shell-input"
         ]
     },
     "settings": {
         "files.associations": {
+            "*.hpp": "cpp",
             "memory": "cpp",
             "exception": "cpp",
             "mcu.hpp": "c",
@@ -65,7 +68,11 @@
             "ctime": "cpp",
             "ratio": "cpp",
             "stm32f750.hpp": "c",
-            "cstring": "cpp"
+            "cstring": "cpp",
+            "fstream": "cpp",
+            "istream": "cpp",
+            "sstream": "cpp",
+            "iostream": "cpp"
         },
         "editor.rulers": [
             80
@@ -73,7 +80,67 @@
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "xaver.clang-format",
         "C_Cpp.errorSquiggles": "Enabled",
-        "cortex-debug.variableUseNaturalFormat": false
+        "cortex-debug.variableUseNaturalFormat": false,
+        "commands.commands": {
+            "Target": {
+                "nestedItems": {
+                    "Build": {
+                        "icon": "wrench",
+                        "command": "workbench.action.tasks.runTask",
+                        "args": "Build" 
+                    },
+                    "Clean": {
+                        "icon": "clear-all",
+                        "command": "workbench.action.tasks.runTask",
+                        "args": "Clean" 
+                    },
+                    "Clean & Build": {
+                        "icon": "debug-restart",
+                        "command": "workbench.action.tasks.runTask",
+                        "args": "Clean & Build" 
+                    }
+                }
+            },
+            "Unit tests": {
+                "nestedItems": {
+                    "Build": {
+                        "icon": "wrench",
+                        "command": "workbench.action.tasks.runTask",
+                        "args": "Build unit tests" 
+                    },
+                    "Clean": {
+                        "icon": "clear-all",
+                        "command": "workbench.action.tasks.runTask",
+                        "args": "Clean unit tests" 
+                    },
+                    "Run all": {
+                        "icon": "microscope",
+                        "command": "workbench.action.tasks.runTask",
+                        "args": "Run unit tests" 
+                    },
+                    "Run single test sheet": {
+                        "icon": "ruby",
+                        "command": "workbench.action.tasks.runTask",
+                        "args": "Run unit test sheet" 
+                    },
+                    "Run with filter": {
+                        "icon": "list-filter",
+                        "command": "workbench.action.tasks.runTask",
+                        "args": "Run unit tests with filter" 
+                    },
+                    "Run all coverage": {
+                        "icon": "graph",
+                        "command": "workbench.action.tasks.runTask",
+                        "args": "Run unit test coverage" 
+                    },
+                    "Run coverage on single test suite": {
+                        "icon": "project",
+                        "command": "workbench.action.tasks.runTask",
+                        "args": "Run unit test coverage on test suite" 
+                    }
+                }
+            }
+        }
     },
     "tasks": {
         "version": "2.0.0",
@@ -83,6 +150,7 @@
                 "type": "shell",
                 "command": "make",
                 "args": [
+                    "-j$(nproc)",
                     "all",
                     "LOG_LEVEL=DEBUG"
                 ],
@@ -112,6 +180,149 @@
                 "problemMatcher": [
                     "$gcc"
                 ]
+            },
+            {
+                "label": "Build unit tests",
+                "type": "shell",
+                "command": "make",
+                "options": {
+                    "cwd": "${workspaceRoot}/tests/unit"
+                },
+                "args": [
+                    "CXX=g++",
+                    "-j$(nproc)",
+                    "compile"
+                ],
+                "problemMatcher": [
+                    "$gcc"
+                ]
+            },
+            {
+                "label": "Clean unit tests",
+                "type": "shell",
+                "command": "make",
+                "options": {
+                    "cwd": "${workspaceRoot}/tests/unit"
+                },
+                "args": [
+                    "CXX=g++",
+                    "clean"
+                ],
+                "problemMatcher": [
+                    "$gcc"
+                ]
+            },
+            {
+                "label": "Run unit tests",
+                "type": "shell",
+                "dependsOrder": "sequence",
+                "dependsOn": [ "Build unit tests"],
+                "command": "make",
+                "options": {
+                    "cwd": "${workspaceRoot}/tests/unit"
+                },
+                "args": [
+                    "CXX=g++",
+                    "all"
+                ],
+                "problemMatcher": [
+                    "$gcc"
+                ]
+            },
+            {
+                "label": "Run unit test sheet",
+                "type": "shell",
+                "dependsOrder": "sequence",
+                "dependsOn": [ "Build unit tests"],
+                "command": "${workspaceRoot}/tests/unit/build/${input:test_program}",
+                "options": {
+                    "cwd": "${workspaceRoot}/tests/unit"
+                },
+                "args": [
+                    "-c"
+                ],
+                "problemMatcher": [
+                    "$gcc"
+                ]
+            },      
+            {
+                "label": "Run unit tests with filter",
+                "type": "shell",
+                "dependsOrder": "sequence",
+                "dependsOn": [ "Build unit tests"],
+                "command": "make",
+                "options": {
+                    "cwd": "${workspaceRoot}/tests/unit"
+                },
+                "args": [
+                    "${workspaceRoot}/tests/unit/build/",
+                    "CPPUTEST_EXE_FLAGS=-c -n ${input:test_filter}",
+                    "all"
+                ],
+                "problemMatcher": [
+                    "$gcc"
+                ]
+            },
+            {
+                "label": "Run unit test coverage",
+                "type": "shell",
+                "dependsOrder": "sequence",
+                "dependsOn": [ "Build unit tests"],
+                "command": "make",
+                "options": {
+                    "cwd": "${workspaceRoot}/tests/unit"
+                },
+                "args": [
+                    "CXX=g++",
+                    "lcov"
+                ],
+                "problemMatcher": [
+                    "$gcc"
+                ]
+            },
+            {
+                "label": "Run unit test coverage on test suite",
+                "type": "shell",
+                "dependsOrder": "sequence",
+                "command": "make",
+                "options": {
+                    "cwd": "${workspaceRoot}/tests/unit"
+                },
+                "args": [
+                    "-j$(nproc)",
+                    "CXX=g++",
+                    "UNITTEST_MAKEFILE_FILTER=*${input:component_name}*",
+                    "clean_coverage",
+                    "lcov"
+                ],
+                "problemMatcher": [
+                    "$gcc"
+                ]
+            }
+        ],
+        "inputs": [
+            {
+                "id": "test_filter",
+                "type": "promptString",
+                "description": "Enter test filter. Only tests whose name contains the given substring will run."
+            },
+            {
+                "id": "component_name",
+                "type": "command",
+                "command": "shellCommand.execute",
+                "args": {
+                    "command": "grep -r COMPONENT_NAME * | cut -d'=' -f2",
+                    "cwd": "${workspaceFolder}/tests/unit/makefiles"
+                },
+            },
+            {
+                "id": "test_program",
+                "type": "command",
+                "command": "shellCommand.execute",
+                "args": {
+                    "command": "find . -type f -executable -print",
+                    "cwd": "${workspaceFolder}/tests/unit/build"
+                },
             }
         ]
     },
@@ -140,7 +351,27 @@
                 "runToMain": true,
                 "preLaunchTask": "Build",
                 "demangle": true,
+            },
+            {
+                "name": "Unit test debug",
+                "type": "cppdbg",
+                "request": "launch",
+                "program": "${workspaceRoot}/tests/unit/build/${input:test_program}",
+                "args": ["-c"],
+                "cwd": "${workspaceRoot}/tests/unit",
+                "preLaunchTask": "Build unit tests",
             }
-        ]
-    }
+        ],
+        "inputs": [
+            {
+                "id": "test_program",
+                "type": "command",
+                "command": "shellCommand.execute",
+                "args": {
+                    "command": "find . -type f -executable -print",
+                    "cwd": "${workspaceFolder}/tests/unit/build"
+                },
+            }            
+        ],
+    },
 }

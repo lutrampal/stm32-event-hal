@@ -34,4 +34,7 @@ $(UNITTEST_MAKEFILES):
 clean:
 	rm -rf $(UNITTEST_BUILD_DIR)
 
+clean_coverage:
+	find $(UNITTEST_BUILD_DIR) -name "*.gcda" -type f -delete
+
 .PHONY: all clean $(UNITTEST_MAKEFILES)

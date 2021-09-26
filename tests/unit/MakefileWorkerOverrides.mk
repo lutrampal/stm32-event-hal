@@ -68,7 +68,7 @@ export CPPUTEST_OBJS_DIR = $(UNITTEST_RESULT_DIR)/objs
 export CPPUTEST_LIB_DIR = $(UNITTEST_RESULT_DIR)/lib
 
 # Enable color!
-export CPPUTEST_EXE_FLAGS = "-c"
+CPPUTEST_EXE_FLAGS ?= "-c"
 
 CPPUTEST_CXXFLAGS = -std=c++17
 

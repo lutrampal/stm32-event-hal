@@ -3,7 +3,8 @@
         {
             "name": "Arm-Bare-Metal",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "/usr/include"
             ],
             "defines": [
                 "${env:STM32_MCU}",
