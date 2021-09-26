@@ -61,10 +61,10 @@ class CharacterDevice
      *  The number of characters to write */
     virtual void startWrite(const T* buf, size_t buf_size) = 0;
     /** Cancel a running write operation.
-     *  When cancelling a write operation, the device must still make the call
-     * to write_complete_callback but it must pass the Aborted StatusCode as
-     * parameter. */
-    virtual bool cancelWrite() = 0;
+     *  When cancelling a write operation, the device should not execute the
+     * write callback. It is the responsability of the calling character driver
+     * to know if the cancellation should be reported to the event loop. */
+    virtual bool cancelWrite(size_t& nb_written) = 0;
 
     /** Begin a write operation
      * @param buf
@@ -77,7 +77,11 @@ class CharacterDevice
     virtual void startRead(T* buf,
                            size_t buf_size,
                            std::optional<T> stop_char = std::nullopt) = 0;
-    virtual bool cancelRead()                                         = 0;
+    /** Cancel a running read operation.
+     *  When cancelling a read operation, the device should not execute the
+     * read callback. It is the responsability of the calling character driver
+     * to know if the cancellation should be reported to the event loop. */
+    virtual bool cancelRead(size_t& nb_read) = 0;
 
   protected:
     std::function<void(size_t, ErrorStatus&&)> write_complete_callback;

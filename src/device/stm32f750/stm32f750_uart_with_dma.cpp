@@ -104,8 +104,9 @@ void Stm32f750UartWithDma::startWrite(const char* buf, size_t buf_size)
     uart->CR1 |= USART_CR1_TE;
 }
 
-bool Stm32f750UartWithDma::cancelWrite()
+bool Stm32f750UartWithDma::cancelWrite(size_t& nb_written)
 {
+    nb_written = 0;
     // TODO
     return false;
 }
@@ -118,8 +119,9 @@ void Stm32f750UartWithDma::startRead(char* buf,
     // TODO
 }
 
-bool Stm32f750UartWithDma::cancelRead()
+bool Stm32f750UartWithDma::cancelRead(size_t& nb_read)
 {
+    nb_read = 0;
     // TODO
     return false;
 }

@@ -77,16 +77,17 @@ template<typename T>
 void hal::driver::CharacterDriver<T>::cancelAsyncWrite()
 {
     using namespace hal::device;
+    size_t nb_written;
 
     if (!busy_w) {
         throw CancelAsyncOpFailure{"Nothing to cancel"};
     }
 
-    if (!device.cancelWrite()) {
+    if (!device.cancelWrite(nb_written)) {
         throw CancelAsyncOpFailure{"Failed to cancel operation"};
     }
 
-    busy_w = false;
+    completeWrite(nb_written, ErrorCode::Aborted);
 }
 template<typename T>
 void hal::driver::CharacterDriver<T>::asyncRead(
@@ -123,14 +124,15 @@ template<typename T>
 void hal::driver::CharacterDriver<T>::cancelAsyncRead()
 {
     using namespace hal::device;
+    size_t nb_read;
 
     if (!busy_r) {
         throw CancelAsyncOpFailure{"Nothing to cancel"};
     }
 
-    if (!device.cancelRead()) {
+    if (!device.cancelRead(nb_read)) {
         throw CancelAsyncOpFailure{"Failed to cancel operation"};
     }
 
-    busy_r = false;
+    completeRead(nb_read, ErrorCode::Aborted);
 }

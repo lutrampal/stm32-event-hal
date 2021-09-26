@@ -114,7 +114,7 @@ void Stm32f750Uart::startWrite(const char* buf, size_t buf_size)
     uart->CR1 |= USART_CR1_UE | USART_CR1_TE | USART_CR1_TXEIE;
 }
 
-bool Stm32f750Uart::cancelWrite()
+bool Stm32f750Uart::cancelWrite(size_t& nb_written)
 {
     if (nb_to_write == 0) {
         /* Nothing to cancel */
@@ -124,7 +124,7 @@ bool Stm32f750Uart::cancelWrite()
     nb_to_write = 0;
     uart->CR1 &= ~USART_CR1_TE & ~USART_CR1_TXEIE;
 
-    write_complete_callback(nb_written, ErrorStatus{ErrorCode::Aborted});
+    nb_written = this->nb_written;
     return true;
 }
 
@@ -142,7 +142,7 @@ void Stm32f750Uart::startRead(char* buf,
     uart->CR1 |= USART_CR1_UE | USART_CR1_RE | USART_CR1_RXNEIE;
 }
 
-bool Stm32f750Uart::cancelRead()
+bool Stm32f750Uart::cancelRead(size_t& nb_read)
 {
     if (nb_to_read == 0) {
         /* Nothing to cancel */
@@ -152,6 +152,6 @@ bool Stm32f750Uart::cancelRead()
     nb_to_read = 0;
     uart->CR1 &= ~USART_CR1_RE & ~USART_CR1_RXNEIE;
 
-    read_complete_callback(nb_read, ErrorStatus{ErrorCode::Aborted});
+    nb_read = this->nb_read;
     return true;
 }

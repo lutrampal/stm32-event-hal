@@ -44,12 +44,12 @@ class Stm32f750Uart : public CharacterDevice<char>
     void onReceiveDataRegisterNotEmpty();
 
     void startWrite(const char* buf, size_t buf_size) override;
-    bool cancelWrite() override;
+    bool cancelWrite(size_t& nb_written) override;
 
     void startRead(char* buf,
                    size_t buf_size,
                    std::optional<char> stop_char = std::nullopt) override;
-    bool cancelRead() override;
+    bool cancelRead(size_t& nb_read) override;
 
   private:
     /* Read buffer */

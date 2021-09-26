@@ -46,7 +46,7 @@ class Stm32f750UartWithDma : public CharacterDevice<char>
     ~Stm32f750UartWithDma();
 
     void startWrite(const char* buf, size_t buf_size) override;
-    bool cancelWrite() override;
+    bool cancelWrite(size_t& nb_written) override;
 
     /** /!\ UART with DMA does not support stop characters, an
      * @ref UnsupportedDeviceOperation will be raised if stop_char is not
@@ -54,7 +54,7 @@ class Stm32f750UartWithDma : public CharacterDevice<char>
     void startRead(char* buf,
                    size_t buf_size,
                    std::optional<char> stop_char = std::nullopt) override;
-    bool cancelRead() override;
+    bool cancelRead(size_t& nb_read) override;
 
   private:
     USART_TypeDef* const uart;
