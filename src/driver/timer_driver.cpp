@@ -8,7 +8,6 @@
 #include "driver_exceptions.hpp"
 
 #include <algorithm>
-#include <device/irqs.hpp>
 
 
 using namespace std;

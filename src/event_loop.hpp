@@ -23,8 +23,10 @@ namespace hal
 class EventLoop
 {
   public:
+    typedef std::function<void()>&& EventCallback;
+
     void run();
-    void pushEvent(std::function<void()>&& event_handler);
+    void pushEvent(EventCallback event_handler);
 
   private:
     std::list<std::function<void()>> event_queue;

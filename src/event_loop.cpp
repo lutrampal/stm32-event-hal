@@ -6,7 +6,6 @@
 #include "event_loop.hpp"
 
 #include "device/irqs.hpp"
-#include "hardware/mcu.hpp"
 
 using namespace std;
 using namespace hal;

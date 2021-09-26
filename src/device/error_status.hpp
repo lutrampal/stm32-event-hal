@@ -11,7 +11,7 @@
  * INCLUDE DIRECTIVES
  ******************************************************************************/
 
-#include "error_code.hpp"
+#include <ostream>
 
 namespace hal
 {
@@ -20,6 +20,13 @@ namespace device
 /*******************************************************************************
  * CLASS DEFINITION
  ******************************************************************************/
+
+enum class ErrorCode {
+    Success,  // Successful completion of operation
+    Aborted,  // The operation was cancelled/aborted
+    Failure,  // Failure of operation (unspecified cause)
+    NbCodes
+};
 
 class ErrorStatus
 {
@@ -39,6 +46,20 @@ class ErrorStatus
 
   private:
     ErrorCode code;
+
+    friend std::ostream& operator<<(std::ostream& os, ErrorStatus const& err)
+    {
+        switch (err.code) {
+            case ErrorCode::Success:
+                return os << "Success";
+            case ErrorCode::Aborted:
+                return os << "Aborted";
+            case ErrorCode::Failure:
+                return os << "Failure";
+            default:
+                return os << "UnknownErrorCode";
+        }
+    }
 };
 
 
