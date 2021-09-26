@@ -27,16 +27,19 @@
 #include "CppUTest/TestRegistry.h"
 #include "CppUTestExt/MockSupportPlugin.h"
 
-#include <mocks/device/error_status_comparator.hpp>
+#include <mocks/comparators/error_status_comparator.hpp>
+#include <mocks/comparators/optional_comparator.hpp>
 
 
 static MockSupportPlugin mock_plugin;
 static hal::device::ErrorStatusComparator err_status_cmp;
+static hal::device::OptionalComparator<char> optional_char_cmp;
 
 
 int main(int argc, char** argv)
 {
     mock_plugin.installComparator("ErrorStatus", err_status_cmp);
+    mock_plugin.installComparator("optional<char>", optional_char_cmp);
     TestRegistry::getCurrentRegistry()->installPlugin(&mock_plugin);
 
     return CommandLineTestRunner::RunAllTests(argc, argv);

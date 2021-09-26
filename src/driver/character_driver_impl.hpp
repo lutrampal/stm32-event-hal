@@ -56,6 +56,10 @@ void hal::driver::CharacterDriver<T>::asyncWrite(
         throw StartAsyncOpFailure{"Driver is busy"};
     }
 
+    if (buf == nullptr) {
+        throw StartAsyncOpFailure{"Write buffer is null"};
+    }
+
     device.startWrite(buf, nb_elem);
     busy_w         = true;
     write_callback = event_callback;
@@ -101,6 +105,10 @@ void hal::driver::CharacterDriver<T>::asyncRead(
 
     if (busy_r) {
         throw StartAsyncOpFailure{"Driver is busy"};
+    }
+
+    if (buf == nullptr) {
+        throw StartAsyncOpFailure{"Read buffer is null"};
     }
 
     device.startRead(buf, nb_elem, stop_char);

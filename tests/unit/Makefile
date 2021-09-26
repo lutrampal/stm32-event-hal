@@ -17,8 +17,6 @@ UNITTEST_MAKEFILES := $(wildcard $(UNITTEST_MAKEFILES_DIR)/Makefile_$(UNITTEST_M
 export UNITTEST_EXTRA_INC_PATHS += \
   -I$(PROJECT_ROOT_DIR)
 
-CPPUTEST_CPPFLAGS = -std=c++17
-
 # Run the test on all Makesfiles found
 all: $(UNITTEST_MAKEFILES)
 
@@ -27,7 +25,7 @@ compile: $(UNITTEST_MAKEFILES)
 
 LCOV_INFO_FILE = $(UNITTEST_BUILD_DIR)/lcov.info
 lcov: $(UNITTEST_MAKEFILES)
-	lcov --base-directory . --directory . -c -o $(LCOV_INFO_FILE) --exclude "*src/device/*" --exclude "/usr/include/*" --exclude "*tests/*"
+	lcov --base-directory . --directory . -c -o $(LCOV_INFO_FILE) --exclude "*src/device/*" --exclude "*src/driver/driver_exceptions.hpp" --exclude "/usr/include/*" --exclude "*tests/*"
 	genhtml -o test_coverage -t "coverage" --num-spaces 4 $(LCOV_INFO_FILE) -o $(UNITTEST_BUILD_DIR)/test_coverage/
 
 $(UNITTEST_MAKEFILES):

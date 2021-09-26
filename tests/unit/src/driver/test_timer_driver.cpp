@@ -39,8 +39,7 @@ TEST_GROUP(TestTimerDriver)
     void teardown()
     {
     }
-}
-;
+};
 // clang-format on
 
 /** Basic TimerDriver test :
