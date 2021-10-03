@@ -20,21 +20,12 @@ export UNITTEST_EXTRA_INC_PATHS += \
 # Run the test on all Makesfiles found
 all: $(UNITTEST_MAKEFILES)
 
-compile: CPPUTEST_BUILD_RULE=start
 compile: $(UNITTEST_MAKEFILES)
-
-LCOV_INFO_FILE = $(UNITTEST_BUILD_DIR)/lcov.info
-lcov: $(UNITTEST_MAKEFILES)
-	lcov --base-directory . --directory . -c -o $(LCOV_INFO_FILE) --exclude "*src/device/*" --exclude "*src/driver/driver_exceptions.hpp" --exclude "/usr/include/*" --exclude "*tests/*"
-	genhtml -o test_coverage -t "coverage" --num-spaces 4 $(LCOV_INFO_FILE) -o $(UNITTEST_BUILD_DIR)/test_coverage/
 
 $(UNITTEST_MAKEFILES):
 	$(MAKE) -f $@ $(CPPUTEST_BUILD_RULE)
 
 clean:
 	rm -rf $(UNITTEST_BUILD_DIR)
-
-clean_coverage:
-	find $(UNITTEST_BUILD_DIR) -name "*.gcda" -type f -delete
-
+	
 .PHONY: all clean $(UNITTEST_MAKEFILES)

@@ -1,13 +1,12 @@
-# where the CppUTest includes and *.a are located
 
-# Uncomment the following values depending on which system
-# This is obviously better done using `ifeq` and checking the system type
+include $(PROJECT_ROOT_DIR)/env.mk
 
-# Linux Values
-CPPUTEST_HOME ?= /usr
-TARGET_PLATFORM ?= x86_64-linux-gnu
+SRC_FILES += $(shell find $(PLATFORM_DIRS) -maxdepth 1 -type f -name *.$(CXX_EXT)) \
+  $(ROOT_SRC_DIR)/event_loop.cpp  $(COMPONENT_SRC_DIR)/logger.cpp $(DEVICE_SRC_DIR)/error_status.cpp
 
-LD_LIBRARIES = -L$(CPPUTEST_HOME)/$(TARGET_PLATFORM)lib -lCppUTest -lCppUTestExt
+CPPUTEST_HOME ?= /usr/arm-none-eabi
+
+LD_LIBRARIES = -lCppUTest
 
 CXX_host ?= g++
 
@@ -19,16 +18,13 @@ UNITTEST_EXTRA_INC_PATHS += \
   -I$(UNITTEST_ROOT)/ \
   -I$(PROJECT_ROOT_DIR)
 
-# Define `INSIDE_UNITTEST` so that our code can do things like `#if INSIDE_UNITTEST`
-CPPUTEST_CPPFLAGS += $(UNITTEST_EXTRA_INC_PATHS) \
-  -DINSIDE_UNITTEST=1 -fno-inline -fno-inline-small-functions -fno-default-inline -O0
+CPPUTEST_CPPFLAGS += $(UNITTEST_EXTRA_INC_PATHS) $(DEFINES) -DINSIDE_UNITTEST
+CPPUTEST_LDFLAGS += $(LFLAGS) 
 
-
-export CPPUTEST_USE_EXTENSIONS=Y
-export CPPUTEST_USE_MEM_LEAK_DETECTION=Y
-export CPPUTEST_USE_GCOV=Y
-# Enable branch coverage reporting
-export GCOV_ARGS=-b -c
+export CPPUTEST_USE_EXTENSIONS=N
+export CPPUTEST_USE_MEM_LEAK_DETECTION=N
+export CPPUTEST_USE_GCOV=N
+export CPPUTEST_USE_LONG_LONG=Y
 
 CC_VERSION_OUTPUT ="$(shell $(CXX_host) -v 2>&1)"
 CLANG_STR = clang
@@ -49,7 +45,6 @@ COMPILER_SPECIFIC_WARNINGS += \
 endif
 
 CPPUTEST_WARNINGFLAGS += $(COMPILER_SPECIFIC_WARNINGS)
-CPPUTEST_WARNINGFLAGS += -Werror
 export CPPUTEST_WARNINGFLAGS
 
 UNITTEST_RESULT_DIR = $(UNITTEST_BUILD_DIR)/$(COMPONENT_NAME)
@@ -60,8 +55,6 @@ export CPPUTEST_LIB_DIR = $(UNITTEST_RESULT_DIR)/lib
 
 # Enable color!
 CPPUTEST_EXE_FLAGS ?= "-c"
-
-CPPUTEST_CXXFLAGS = -std=c++17
 
 # run MakefileWorker.mk with the variables defined here
 include MakefileWorker.mk
