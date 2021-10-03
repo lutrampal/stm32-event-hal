@@ -339,7 +339,7 @@
                 "stm32cubeprogrammer": "${env:CUBE_PROGRAMMER_BIN_DIR}",
                 "serverpath": "${env:STLINK_GDB_SERVER}",
                 "serverArgs": [
-                    "-l", "31", "-v", "-s", "-k", "-e", "-el", "${env:STM32_EXT_LOADER}"
+                    "-l", "31", "-v", "-s", "-k", "-el", "${env:STM32_EXT_LOADER}"
                 ],
                 "overrideGDBServerStartedRegex": "Waiting for connection on port.*",
                 "gdbPath": "${env:GDB}",
