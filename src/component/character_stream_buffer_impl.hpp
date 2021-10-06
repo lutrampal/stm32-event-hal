@@ -33,6 +33,9 @@ void hal::component::CharacterStreamBuffer<T>::bufferWrittenCallback(
     size_t nb_written,
     device::ErrorStatus& status)
 {
+    (void)nb_written;
+    (void)status;
+
     using namespace std;
     using namespace hal::component;
 
