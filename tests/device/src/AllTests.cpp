@@ -26,7 +26,14 @@
 #include "CppUTest/CommandLineTestRunner.h"
 #include "CppUTest/TestRegistry.h"
 
-int main(int argc, char** argv)
+#include <component/logger.hpp>
+
+int main()
 {
-    return CommandLineTestRunner::RunAllTests(argc, argv);
+    const char** argv = nullptr;
+
+    logger_init_stdios();
+    
+    CommandLineTestRunner::RunAllTests(0, argv);
+    while (true) {}
 }
