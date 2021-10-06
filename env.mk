@@ -15,7 +15,7 @@ OC ?= arm-none-eabi-objcopy
 OS ?= arm-none-eabi-size
 GDB ?= arm-none-eabi-gdb
 
-WFLAGS ?= -Wall -Wpedantic -Wextra -Wno-unused-parameter
+WFLAGS ?= -Wall -Wpedantic -Wextra
 ARMFLAGS = -mcpu=$(MCU) -mthumb -mhard-float -mfloat-abi=hard -mfpu=fpv5-sp-d16
 CXXFLAGS = -c -fexceptions -ffunction-sections -fdata-sections -std=c++17 \
 	-specs=nosys.specs $(ARMFLAGS) $(WFLAGS)
