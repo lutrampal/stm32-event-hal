@@ -28,6 +28,11 @@ void __attribute__((naked)) __attribute__((section(".reset")))
 handleReset(void);
 }
 
+/* vtable will be relocated to DTCM ram so we'll only use 2 words at boot time:
+ * the stackpointer & the resetHandler */
+__attribute__((section(".boot_vtable"))) volatile uint32_t boot_vtable[2] = {
+    (uint32_t)&_estack, (uint32_t)&handleReset};
+
 
 /*******************************************************************************
  * STATIC CONSTANT DEFINITIONS
@@ -636,8 +641,6 @@ static void m_setDerivedClocks()
 
 void handleReset(void)
 {
-    __asm__("LDR r0, =_estack\n\t"
-            "MOV sp, r0\n\t");
     /* Do not break debugger when in standy or sleep mode */
 #ifdef DEBUG
     DBGMCU->CR |= DBGMCU_CR_DBG_STANDBY | DBGMCU_CR_DBG_SLEEP;

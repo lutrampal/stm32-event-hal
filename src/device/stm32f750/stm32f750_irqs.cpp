@@ -26,8 +26,8 @@ extern "C" {
  * EXTERN VARIABLE DEFINITIONS
  ******************************************************************************/
 
-__attribute__((aligned(0x200))) __attribute__((
-    section(".dtcm_vtable"))) volatile InterruptHandler g_vtable[nb_irqs];
+__attribute__((aligned(0x200)))
+__attribute__((section(".vtable"))) volatile InterruptHandler g_vtable[nb_irqs];
 
 
 /*******************************************************************************

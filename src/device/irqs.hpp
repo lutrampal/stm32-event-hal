@@ -33,8 +33,8 @@ typedef void (*InterruptHandler)(void);
  ******************************************************************************/
 
 extern "C" {
-__attribute__((aligned(0x200))) __attribute__((section(
-    ".dtcm_vtable"))) extern volatile InterruptHandler g_vtable[nb_irqs];
+__attribute__((aligned(0x200))) __attribute__((
+    section(".vtable"))) extern volatile InterruptHandler g_vtable[nb_irqs];
 
 
 /*******************************************************************************

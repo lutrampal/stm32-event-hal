@@ -4,6 +4,7 @@ SECTIONS
     .boot_code :
     {
         . = ALIGN(4);
+        KEEP (*(.boot_vtable))
         KEEP (*(.reset))
         KEEP (*(.boot_code))
         KEEP (*(.boot_code*))
@@ -111,7 +112,7 @@ SECTIONS
     {
         . = ALIGN(4);
         _sdtcm = .;
-        KEEP (*(.dtcm_vtable))
+        KEEP (*(.vtable))
         . = ALIGN(4);
         _edtcm = .;
     } >DTCMRAM_V
