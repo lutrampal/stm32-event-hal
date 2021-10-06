@@ -1,6 +1,6 @@
 
 /*******************************************************************************
- * Implementation file of Logger class
+ * Implementation file of logger functions
  ******************************************************************************/
 
 /*******************************************************************************
@@ -12,7 +12,6 @@
 #include "character_stream_buffer.hpp"
 
 #include <device/system.hpp>
-#include <driver/character_driver.hpp>
 
 using namespace std;
 using namespace hal;
@@ -20,58 +19,23 @@ using namespace component;
 using namespace driver;
 using namespace device;
 
-
 /*******************************************************************************
- * PRIVATE TYPE DEFINITIONS
+ * STATIC OBJECTS
  ******************************************************************************/
 
-/*******************************************************************************
- * STATIC FUNCTION DECLARATIONS
- ******************************************************************************/
+static CharacterDriver<char> log_driver{
+    System::getInstance().getEventLoop(),
+    System::getInstance().getUartWithDma(logging_uart_id)};
+static CharacterStreamBuffer log_buffer{log_driver};
 
 /*******************************************************************************
- * STATIC FUNCTION DEFINITIONS
+ * PUBLIC FUNCTION IMPLEMENTATIONS
  ******************************************************************************/
 
-/*******************************************************************************
- * CONSTRUCTORS & DESTRUCTOR
- ******************************************************************************/
-
-Logger::Logger()
-: driver{System::getInstance().getEventLoop(),
-         System::getInstance().getUartWithDma(logging_uart_id)},
-  buffer{driver}, os{&buffer}
+void logger_init_stdios()
 {
-}
-
-Logger::~Logger()
-{
-}
-
-/*******************************************************************************
- * OPERATOR IMPLEMENTATIONS
- ******************************************************************************/
-
-/*******************************************************************************
- * PRIVATE METHOD IMPLEMENTATIONS
- ******************************************************************************/
-
-/*******************************************************************************
- * PROTECTED METHOD IMPLEMENTATIONS
- ******************************************************************************/
-
-/*******************************************************************************
- * PUBLIC METHOD IMPLEMENTATIONS
- ******************************************************************************/
-
-std::basic_ostream<char>& Logger::getOutputStream()
-{
-    return os;
-}
-
-Logger& Logger::getInstance()
-{
-    static Logger s;
-
-    return s;
+    cout.rdbuf(&log_buffer);
+    cerr.rdbuf(&log_buffer);
+    cin.rdbuf(&log_buffer);
+    clog.rdbuf(&log_buffer);
 }

@@ -1,6 +1,6 @@
 
 /*******************************************************************************
- * Basic logging utility
+ * Basic logging utility, this prints logs on cout so the user should
  ******************************************************************************/
 
 #ifndef _HAL_COMPONENT_LOGGER_HPP
@@ -10,9 +10,7 @@
  * INCLUDE DIRECTIVES
  ******************************************************************************/
 
-#include <component/character_stream_buffer.hpp>
-#include <driver/character_driver.hpp>
-#include <ostream>
+#include <iostream>
 
 /*******************************************************************************
  * MACRO DEFINITION
@@ -66,41 +64,19 @@
     #define LOG_FATAL(module, msg)
 #endif
 
-// TODO: Add timestamp?
+// TODO: Add timestamp? (implies implementing RTC driver, could be some fun)
 #define LOG(level, module, msg)                                                \
     do {                                                                       \
-        hal::component::Logger::getInstance().getOutputStream()                \
-            << level << " - " << module << " - " << msg << "\r\n"              \
-            << std::flush;                                                     \
+        std::clog << level << " - " << module << " - " << msg << "\r\n"        \
+                  << std::flush;                                               \
     } while (false)
 
-namespace hal
-{
-namespace component
-{
 /*******************************************************************************
- * CLASS DEFINITION
+ * PUBLIC FUNCTION DECLARATIONS
  ******************************************************************************/
 
-class Logger
-{
-  public:
-    Logger(Logger const&) = delete;
-    Logger& operator=(Logger const&) = delete;
-
-    static Logger& getInstance();
-    std::basic_ostream<char>& getOutputStream();
-
-  private:
-    Logger();
-    ~Logger();
-
-    hal::driver::CharacterDriver<char> driver;
-    hal::component::CharacterStreamBuffer<char> buffer;
-    std::basic_ostream<char> os;
-};
-
-}  // namespace component
-}  // namespace hal
+/** Initialize standard input/outputs so that they are all redirected to the
+ * logging UART */
+void logger_init_stdios();
 
 #endif
